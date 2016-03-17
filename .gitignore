@@ -1,0 +1,13 @@
+.DS_Store
+*.iml
+.idea
+target
+.classpath
+.project
+logs/
+.history
+project/project
+project/target
+fpm/**/*.jar
+fpm/**/*.rpm
+/bin/
