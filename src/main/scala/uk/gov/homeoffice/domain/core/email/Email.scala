@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 
 case class Email(emailId: String = new ObjectId().toString,
                  caseId: Option[String],
-                 caseRef: Option[String],
+                 caseRef: Option[String] = None,
                  date: DateTime,
                  recipient: String,
                  subject: String,
