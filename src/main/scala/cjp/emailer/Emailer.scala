@@ -26,11 +26,11 @@ class Emailer(emailRepository: EmailRepository, emailSender: EmailSender, sender
       emailRepository.updateStatus(email.emailId, STATUS_SENT)
     } catch {
       case e: EmailException =>
-        logger.error(e.getMessage)
+        logger.error(e.getMessage, e)
         emailRepository.updateStatus(email.emailId, STATUS_EMAIL_ADDRESS_ERROR)
 
       case e: Exception =>
-        logger.error(e.getMessage)
+        logger.error(e.getMessage, e)
     }
   }
 

@@ -8,7 +8,7 @@ object Build extends Build {
     .settings(
       name := moduleName,
       organization := "uk.gov.homeoffice",
-      version := "1.0.1",
+      version := "1.0.2",
       scalaVersion := "2.11.8",
       scalacOptions ++= Seq(
         "-feature",

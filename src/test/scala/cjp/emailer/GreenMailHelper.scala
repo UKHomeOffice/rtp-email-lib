@@ -6,8 +6,7 @@ import java.util.concurrent.TimeUnit
 import javax.mail.Message.RecipientType
 import javax.mail.internet.{MimeMessage, MimeMultipart}
 
-import cjp.emailer.SmtpConfig
-import com.icegreen.greenmail.util.{ServerSetup, GreenMail}
+import com.icegreen.greenmail.util.{GreenMail, ServerSetup}
 import org.specs2.specification.BeforeAfterEach
 
 import scala.concurrent.duration.FiniteDuration
