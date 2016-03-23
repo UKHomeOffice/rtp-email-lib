@@ -8,7 +8,7 @@ object Build extends Build {
     .settings(
       name := moduleName,
       organization := "uk.gov.homeoffice",
-      version := "1.0.2",
+      version := "1.0.3",
       scalaVersion := "2.11.8",
       scalacOptions ++= Seq(
         "-feature",
@@ -45,13 +45,13 @@ object Build extends Build {
         "com.icegreen" % "greenmail" % "1.3.1b" % "test",
         "com.github.finagle" %% "finch-core" % "0.3.0",
         "com.github.finagle" %% "finch-json" % "0.3.0",
-        "uk.gov.homeoffice" %% "rtp-io-lib" % `rtp-io-lib-version` withSources(),
+        "uk.gov.homeoffice" %% "rtp-io-lib" % `rtp-io-lib-version` withSources() exclude("javax.mail", "mailapi"),
         "uk.gov.homeoffice" %% "rtp-test-lib" % `rtp-test-lib-version` withSources(),
-        "uk.gov.homeoffice" %% "rtp-mongo-lib" % `rtp-mongo-lib-version` withSources()
+        "uk.gov.homeoffice" %% "rtp-mongo-lib" % `rtp-mongo-lib-version` withSources() exclude("javax.mail", "mailapi")
       ) ++ Seq(
-        "uk.gov.homeoffice" %% "rtp-io-lib" % `rtp-io-lib-version` % Test classifier "tests" withSources(),
+        "uk.gov.homeoffice" %% "rtp-io-lib" % `rtp-io-lib-version` % Test classifier "tests" withSources() exclude("javax.mail", "mailapi"),
         "uk.gov.homeoffice" %% "rtp-test-lib" % `rtp-test-lib-version` % Test classifier "tests" withSources(),
-        "uk.gov.homeoffice" %% "rtp-mongo-lib" % `rtp-mongo-lib-version` % Test classifier "tests" withSources()
+        "uk.gov.homeoffice" %% "rtp-mongo-lib" % `rtp-mongo-lib-version` % Test classifier "tests" withSources() exclude("javax.mail", "mailapi")
       )
     })
 }
