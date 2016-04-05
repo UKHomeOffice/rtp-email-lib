@@ -8,7 +8,7 @@ object Build extends Build {
     .settings(
       name := moduleName,
       organization := "uk.gov.homeoffice",
-      version := "1.0.3",
+      version := "1.0.3-SNAPSHOT",
       scalaVersion := "2.11.8",
       scalacOptions ++= Seq(
         "-feature",
@@ -30,9 +30,9 @@ object Build extends Build {
       )
     )
     .settings(libraryDependencies ++= {
-      val `rtp-io-lib-version` = "1.2.0-SNAPSHOT"
+      val `rtp-io-lib-version` = "1.7.2-SNAPSHOT"
       val `rtp-test-lib-version` = "1.2.0-SNAPSHOT"
-      val `rtp-mongo-lib-version` = "1.6.0-SNAPSHOT"
+      val `rtp-mongo-lib-version` = "1.7.1-SNAPSHOT"
 
       Seq(
         "org.clapper" %% "grizzled-slf4j" % "1.0.2",
