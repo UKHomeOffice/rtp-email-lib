@@ -29,9 +29,9 @@ object Build extends Build {
       )
     )
     .settings(libraryDependencies ++= {
-      val `rtp-io-lib-version` = "1.7.2-SNAPSHOT"
-      val `rtp-test-lib-version` = "1.2.0-SNAPSHOT"
-      val `rtp-mongo-lib-version` = "1.7.1-SNAPSHOT"
+      val `rtp-io-lib-version` = "1.7.13"
+      val `rtp-test-lib-version` = "1.2.4"
+      val `rtp-mongo-lib-version` = "1.7.5"
 
       Seq(
         "org.clapper" %% "grizzled-slf4j" % "1.0.2",
