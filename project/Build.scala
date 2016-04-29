@@ -1,10 +1,11 @@
 import sbt.Keys._
 import sbt._
+import sbtrelease.ReleasePlugin
 
 object Build extends Build {
   val moduleName = "rtp-email-lib"
 
-  val root = Project(id = moduleName, base = file("."))
+  val root = Project(id = moduleName, base = file(".")).enablePlugins(ReleasePlugin)
     .settings(
       name := moduleName,
       organization := "uk.gov.homeoffice",
