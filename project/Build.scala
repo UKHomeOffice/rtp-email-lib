@@ -31,13 +31,11 @@ object Build extends Build {
       )
     )
     .settings(libraryDependencies ++= {
-      val `rtp-io-lib-version` = "1.7.13"
-      val `rtp-test-lib-version` = "1.2.4"
-      val `rtp-mongo-lib-version` = "1.7.5"
+      val `rtp-io-lib-version` = "1.7.16"
+      val `rtp-test-lib-version` = "1.3.1"
+      val `rtp-mongo-lib-version` = "1.7.7"
 
       Seq(
-        "org.clapper" %% "grizzled-slf4j" % "1.0.2",
-        "ch.qos.logback" % "logback-classic" % "1.1.3",
         "joda-time" % "joda-time" % "2.5",
         "org.joda" % "joda-convert" % "1.7",
         "org.mongodb" %% "casbah-core" % "2.7.4",
