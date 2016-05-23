@@ -74,9 +74,7 @@ trait EmailRepository extends Repository with MongoObjectDate with Logging {
 
     builder += Email.DATE -> mongoObjectFromAndToDateOptions(Some(from), to)
 
-    val emailCursor = collection.find(builder.result(),
-      MongoDBObject(Email.HTML -> 0, Email.TEXT -> 0, Email.SUBJECT -> 0, Email.RECIPIENT -> 0, Email.CC -> 0)
-    ).sort(orderBy = MongoDBObject(Email.DATE -> -1)).toList
+    val emailCursor = collection.find(builder.result()).toList
 
     for {x <- emailCursor} yield {
       Email(x)
