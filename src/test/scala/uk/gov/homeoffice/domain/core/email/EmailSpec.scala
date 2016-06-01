@@ -1,9 +1,8 @@
-package domain.core.email
+package uk.gov.homeoffice.domain.core.email
 
 import com.mongodb.BasicDBList
 import org.joda.time.DateTime
 import org.specs2.mutable.Specification
-import uk.gov.homeoffice.domain.core.email.EmailBuilder
 
 class EmailSpec extends Specification {
 

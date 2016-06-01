@@ -1,14 +1,13 @@
 package uk.gov.homeoffice.domain.core.lock
 
 import java.net.InetAddress
-
 import com.mongodb.DBObject
 import com.mongodb.casbah.ReadPreference
 import com.mongodb.casbah.commons.MongoDBObject
-import grizzled.slf4j.Logging
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 import org.joda.time.Minutes.minutesBetween
+import grizzled.slf4j.Logging
 import uk.gov.homeoffice.domain.core.lock.ProcessLockRepository.EXPIRY_PERIOD_MINS
 import uk.gov.homeoffice.mongo.salat.Repository
 
@@ -40,24 +39,9 @@ object ProcessLockRepository {
 }
 
 trait ProcessLockRepository extends Repository[Lock] with Logging {
-
   val collectionName = "locks"
 
   dao.collection.createIndex(MongoDBObject("name" -> 1), MongoDBObject("name" -> "lockNameIdx", "unique" -> true))
-
-  def obtainLock(name: String, host: String): Option[Lock] = try {
-    findOne(MongoDBObject("name" -> name), ReadPreference.primaryPreferred).fold(newLock(name, host)) {
-      l =>
-        if (minutesBetween(l.createdAt, DateTime.now).getMinutes >= EXPIRY_PERIOD_MINS) {
-          releaseLock(l)
-          newLock(name, host)
-        } else None
-    }
-  } catch {
-    case e: Throwable =>
-      warn(s"error obtaining lock: $name from host: $host. continuing .. ", e)
-      None
-  }
 
   private def newLock(name: String, host: String): Option[Lock] = try {
     val lock = Lock(name = name, host = host, createdAt = DateTime.now)
@@ -67,6 +51,19 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
   } catch {
     case e: Throwable =>
       warn(s"error creating new lock: $name from host: $host. continuing .. ", e)
+      None
+  }
+
+  def obtainLock(name: String, host: String): Option[Lock] = try {
+    findOne(MongoDBObject("name" -> name), ReadPreference.primaryPreferred).fold(newLock(name, host)) { l =>
+      if (minutesBetween(l.createdAt, DateTime.now).getMinutes >= EXPIRY_PERIOD_MINS) {
+        releaseLock(l)
+        newLock(name, host)
+      } else None
+    }
+  } catch {
+    case e: Throwable =>
+      warn(s"error obtaining lock: $name from host: $host. continuing .. ", e)
       None
   }
 
@@ -83,6 +80,7 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
 
 trait ProcessLocking {
   val processLockRepository: ProcessLockRepository
+
   lazy val host = InetAddress.getLocalHost.getHostName
 
   def withLock[T](lockName: String)(f: => T) = processLockRepository.obtainLock(lockName, host).map { lock =>

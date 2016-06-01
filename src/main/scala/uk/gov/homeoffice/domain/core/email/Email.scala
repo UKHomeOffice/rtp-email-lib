@@ -1,4 +1,4 @@
-package domain.core.email
+package uk.gov.homeoffice.domain.core.email
 
 import com.mongodb.{BasicDBList, DBObject}
 import com.mongodb.casbah.commons.{MongoDBList, MongoDBObject}
@@ -64,8 +64,8 @@ object Email {
 }
 
 object EmailStatus {
-  val STATUS_WAITING: String = "WAITING"
-  val STATUS_SENT: String = "SENT"
-  val STATUS_ERROR: String = "ERROR"
-  val STATUS_EMAIL_ADDRESS_ERROR: String = "ERROR - Email Address"
+  val STATUS_WAITING = "WAITING"
+  val STATUS_SENT = "SENT"
+  val STATUS_ERROR = "ERROR"
+  val STATUS_EMAIL_ADDRESS_ERROR = "ERROR - Email Address"
 }

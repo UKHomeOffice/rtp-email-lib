@@ -1,10 +1,9 @@
 package cjp.emailer
 
-import domain.core.email.Email
-import domain.core.email.EmailStatus._
-import grizzled.slf4j.Logging
 import org.apache.commons.mail.EmailException
-import uk.gov.homeoffice.domain.core.email.EmailRepository
+import grizzled.slf4j.Logging
+import uk.gov.homeoffice.domain.core.email.EmailStatus._
+import uk.gov.homeoffice.domain.core.email.{Email, EmailRepository}
 import uk.gov.homeoffice.domain.core.lock.{ProcessLockRepository, ProcessLocking}
 
 class Emailer(emailRepository: EmailRepository, emailSender: EmailSender, sender: EmailAddress, replyTo: Option[EmailAddress] = None, pollingFrequency: Int, override val processLockRepository: ProcessLockRepository) extends ProcessLocking with Logging {

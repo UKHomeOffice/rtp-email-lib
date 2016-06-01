@@ -1,9 +1,8 @@
 package uk.gov.homeoffice.domain.core.email
 
-import domain.core.email.Email
-import domain.core.email.EmailStatus.STATUS_WAITING
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
+import uk.gov.homeoffice.domain.core.email.EmailStatus._
 
 object EmailBuilder {
 

@@ -33,7 +33,7 @@ object Build extends Build {
     .settings(libraryDependencies ++= {
       val `rtp-io-lib-version` = "1.7.16"
       val `rtp-test-lib-version` = "1.3.1"
-      val `rtp-mongo-lib-version` = "1.7.7"
+      val `rtp-mongo-lib-version` = "1.7.16"
 
       Seq(
         "joda-time" % "joda-time" % "2.5",

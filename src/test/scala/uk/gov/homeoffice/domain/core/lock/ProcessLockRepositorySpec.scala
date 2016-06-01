@@ -1,22 +1,16 @@
 package uk.gov.homeoffice.domain.core.lock
 
-import com.mongodb.MongoException.DuplicateKey
+import com.mongodb.DuplicateKeyException
 import com.mongodb.casbah.commons.MongoDBObject
 import org.joda.time.DateTime
-import org.specs2.mutable.{After, Specification}
+import org.specs2.mutable.Specification
 import uk.gov.homeoffice.mongo.casbah.MongoSpecification
 
-class ProcessLockRepositorySpec extends Specification with MongoSpecification with After {
-
+class ProcessLockRepositorySpec extends Specification with MongoSpecification {
   val repository = new ProcessLockRepository with TestMongo
-
-  def after = {
-    repository.remove(MongoDBObject.empty)
-  }
 
   "lock" should {
     "acquire lock if not already taken" in {
-
       val lock: Option[Lock] = repository.obtainLock("SOME_LOCK", "SOME_HOST")
 
       lock mustNotEqual None
@@ -56,7 +50,7 @@ class ProcessLockRepositorySpec extends Specification with MongoSpecification wi
     "not be able to insert two locks" in {
       val now = DateTime.now()
       repository.insert(Lock("SOME_LOCK", "SOME_OTHER_HOST", now))
-      repository.insert(Lock("SOME_LOCK", "SOME_OTHER_HOST", now)) must throwA[DuplicateKey]
+      repository.insert(Lock("SOME_LOCK", "SOME_OTHER_HOST", now)) must throwA[DuplicateKeyException]
     }
   }
 }

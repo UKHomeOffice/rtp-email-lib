@@ -1,8 +1,8 @@
 package uk.gov.homeoffice.domain.core.email
 
-import domain.core.email.EmailStatus.{STATUS_SENT, STATUS_WAITING}
 import org.bson.types.ObjectId
 import org.specs2.mutable.Specification
+import uk.gov.homeoffice.domain.core.email.EmailStatus._
 import uk.gov.homeoffice.mongo.casbah.EmbeddedMongoSpecification
 
 class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification {
@@ -122,7 +122,6 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
     }
   }
 
-
   "findCaseIdsForEmailAlreadySent" should {
     "Return all case ids for which email already sent" in {
       val _caseId = new ObjectId()
@@ -137,7 +136,6 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
 
       caseIds must haveSize(1)
       caseIds must contain((emailType, _caseId))
-
     }
 
     "Return empty if no case ids provided" in {
@@ -152,7 +150,6 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
       val caseIds = repository.findEmailTypesAndCaseIds(Seq(), Seq(emailType))
 
       caseIds must haveSize(0)
-
     }
   }
 }
