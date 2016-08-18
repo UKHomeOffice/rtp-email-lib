@@ -46,7 +46,7 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
   private def newLock(name: String, host: String): Option[Lock] = try {
     val lock = Lock(name = name, host = host, createdAt = DateTime.now)
     insert(lock)
-    info(s"Lock : $name acquired by host : $host")
+    debug(s"Lock : $name acquired by host : $host")
     Some(lock)
   } catch {
     case e: Throwable =>
@@ -69,7 +69,7 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
 
   def releaseLock(lock: Lock): Boolean = try {
     val result = remove(lock)
-    info(s"Lock : ${lock.name} released by host : ${lock.host}")
+    debug(s"Lock : ${lock.name} released by host : ${lock.host}")
     result.getN == 1
   } catch {
     case e: Throwable =>
