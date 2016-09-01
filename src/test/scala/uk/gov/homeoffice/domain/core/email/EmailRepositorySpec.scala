@@ -58,12 +58,13 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
 
     "find email summary by date range" in {
       val emailObj = insertEmail()
-      val emailDocs = repository.findEmailSummaryByDateRange(now.minusHours(1), Some(now))
-      emailDocs.size mustEqual 1
-      emailDocs.head.emailId mustEqual emailObj.emailId
-      emailDocs.head.html mustEqual null
-      emailDocs.head.text mustEqual null
 
+      repository.findEmailSummaryByDateRange(now.minusHours(1), Some(now)).toStream must beLike {
+        case email #:: Stream.Empty =>
+          email.emailId mustEqual emailObj.emailId
+          email.html must beNull
+          email.text must beNull
+      }
     }
   }
 
