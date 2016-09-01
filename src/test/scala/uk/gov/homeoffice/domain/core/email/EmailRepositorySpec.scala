@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.domain.core.email
 
 import org.bson.types.ObjectId
+import org.joda.time.DateTime
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.domain.core.email.EmailStatus._
 import uk.gov.homeoffice.mongo.casbah.EmbeddedMongoSpecification
@@ -10,9 +11,10 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
   val PROVISIONAL_ACCEPTANCE = "provisional-acceptance"
   val FAILED_CREDIBILITY_CHECK = "failed-credibility-check"
   val MEMBERSHIP_EXPIRES_SOON = "expiring soon"
+  val now = new DateTime()
 
   def insertEmail(caseId: Option[ObjectId] = Some(new ObjectId()), emailType: String = PROVISIONAL_ACCEPTANCE, html: String = "html") = {
-    val email = EmailBuilder(caseId = caseId, html = html, emailType = emailType)
+    val email = EmailBuilder(caseId = caseId, html = html, emailType = emailType, date = now)
     repository.insert(email)
     email
   }
@@ -52,6 +54,16 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
       val emailDocs = repository.findByStatus(STATUS_WAITING)
       emailDocs.size mustEqual 1
       emailDocs.head.emailId mustEqual emailObj.emailId
+    }
+
+    "find email summary by date range" in {
+      val emailObj = insertEmail()
+      val emailDocs = repository.findEmailSummaryByDateRange(now.minusHours(1), Some(now))
+      emailDocs.size mustEqual 1
+      emailDocs.head.emailId mustEqual emailObj.emailId
+      emailDocs.head.html mustEqual null
+      emailDocs.head.text mustEqual null
+
     }
   }
 

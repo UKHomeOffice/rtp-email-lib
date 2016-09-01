@@ -67,6 +67,20 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
     for { x <- emailCursor } yield Email(x)
   }
 
+  //Excluded html, text and cc from returned query as take up relatively large amount of space when running reports
+  def findEmailSummaryByDateRange(from: DateTime, to: Option[DateTime]): Iterable[Email] = {
+    val builder = MongoDBObject.empty
+
+    val fields = MongoDBObject("user" -> 1, "emailId" -> 1, "caseId" -> 1, "caseRef" -> 1, "date" -> 1,
+    "recipient" -> 1, "subject" -> 1, "status" -> 1, "emailType" -> 1)
+
+    builder += Email.DATE -> dateRangeQuery(Some(from), to)
+
+    val emailCursor = collection.find(builder.result(), fields).toList
+
+    for { x <- emailCursor } yield Email(x)
+  }
+
   def byEmailStatus(emailStatus: String): Imports.DBObject = MongoDBObject(Email.STATUS -> emailStatus)
 
   def resend(emailId: String): Email = {

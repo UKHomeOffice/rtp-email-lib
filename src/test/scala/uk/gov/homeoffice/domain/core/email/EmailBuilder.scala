@@ -6,11 +6,11 @@ import uk.gov.homeoffice.domain.core.email.EmailStatus._
 
 object EmailBuilder {
 
-  def apply(caseId: Option[ObjectId] = Some(new ObjectId()), emailType: String = "Some email type", html: String = "html") = {
+  def apply(caseId: Option[ObjectId] = Some(new ObjectId()), emailType: String = "Some email type", html: String = "html", date: DateTime = new DateTime()) = {
     val email = Email(
       caseId = if (caseId.isEmpty) None else Some(caseId.get.toString),
       caseRef = Some("123"),
-      date = new DateTime(),
+      date = date,
       recipient = caseId + " recipient",
       subject = "subject",
       text = "text",
