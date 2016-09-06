@@ -62,6 +62,7 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
       repository.findEmailSummaryByDateRange(now.minusHours(1), Some(now)).toStream must beLike {
         case email #:: Stream.Empty =>
           email.emailId mustEqual emailObj.emailId
+          email.emailType mustEqual emailObj.emailType
           email.html must beNull
           email.text must beNull
       }
