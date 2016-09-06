@@ -72,7 +72,7 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
     val builder = MongoDBObject.empty
 
     val fields = MongoDBObject("user" -> 1, "emailId" -> 1, "caseId" -> 1, "caseRef" -> 1, "date" -> 1,
-    "recipient" -> 1, "subject" -> 1, "status" -> 1, "emailType" -> 1)
+    "recipient" -> 1, "subject" -> 1, "status" -> 1, "type" -> 1)
 
     builder += Email.DATE -> dateRangeQuery(Some(from), to)
 
