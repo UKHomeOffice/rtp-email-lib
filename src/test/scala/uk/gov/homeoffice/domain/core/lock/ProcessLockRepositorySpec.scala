@@ -1,9 +1,9 @@
 package uk.gov.homeoffice.domain.core.lock
 
-import com.mongodb.DuplicateKeyException
 import com.mongodb.casbah.commons.MongoDBObject
 import org.joda.time.DateTime
 import org.specs2.mutable.Specification
+import salat.dao.SalatInsertError
 import uk.gov.homeoffice.mongo.casbah.MongoSpecification
 
 class ProcessLockRepositorySpec extends Specification with MongoSpecification {
@@ -50,7 +50,7 @@ class ProcessLockRepositorySpec extends Specification with MongoSpecification {
     "not be able to insert two locks" in {
       val now = DateTime.now()
       repository.insert(Lock("SOME_LOCK", "SOME_OTHER_HOST", now))
-      repository.insert(Lock("SOME_LOCK", "SOME_OTHER_HOST", now)) must throwA[DuplicateKeyException]
+      repository.insert(Lock("SOME_LOCK", "SOME_OTHER_HOST", now)) must throwA[SalatInsertError]
     }
   }
 }
