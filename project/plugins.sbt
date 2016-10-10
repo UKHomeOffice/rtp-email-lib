@@ -1,5 +1,7 @@
 resolvers += Classpaths.sbtPluginReleases
 
+addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-M14")
+
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.2")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.3.5")

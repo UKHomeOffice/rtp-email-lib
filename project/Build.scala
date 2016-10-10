@@ -26,19 +26,19 @@ object Build extends Build {
         "Artifactory Release Realm" at "http://artifactory.registered-traveller.homeoffice.gov.uk/artifactory/libs-release-local/",
         "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
         "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
+        "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
         "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
         "Kamon Repository" at "http://repo.kamon.io"
       )
     )
     .settings(libraryDependencies ++= {
-      val `rtp-io-lib-version` = "1.7.16"
-      val `rtp-test-lib-version` = "1.3.1"
-      val `rtp-mongo-lib-version` = "1.7.16"
+      val `rtp-io-lib-version` = "1.7.23"
+      val `rtp-test-lib-version` = "1.3.4"
+      val `rtp-mongo-lib-version` = "2.0.2"
 
       Seq(
         "joda-time" % "joda-time" % "2.5",
         "org.joda" % "joda-convert" % "1.7",
-        "org.mongodb" %% "casbah-core" % "2.7.4",
         "org.apache.commons" % "commons-email" % "1.3.2",
         "commons-io" % "commons-io" % "2.4",
         "com.icegreen" % "greenmail" % "1.3.1b" % "test",
