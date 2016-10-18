@@ -5,7 +5,6 @@ import org.joda.time.DateTime
 import uk.gov.homeoffice.domain.core.email.EmailStatus._
 
 object EmailBuilder {
-
   def apply(caseId: Option[ObjectId] = Some(new ObjectId()), emailType: String = "Some email type", html: String = "html", date: DateTime = new DateTime()) = {
     val email = Email(
       caseId = if (caseId.isEmpty) None else Some(caseId.get.toString),
@@ -19,6 +18,4 @@ object EmailBuilder {
       emailType = emailType)
     email
   }
-
-
 }
