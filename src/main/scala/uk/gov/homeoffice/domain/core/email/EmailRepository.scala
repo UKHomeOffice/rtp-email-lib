@@ -106,4 +106,7 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
 
   def removeByCaseId(caseId: String): Unit =
     collection remove MongoDBObject(Email.CASE_ID -> new ObjectId(caseId))
+
+  def drop = collection drop
+
 }
