@@ -48,6 +48,12 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
       (emailType, caseId)
     }) toList
 
+  def findByEmailType(emailType: String): List[Email] = {
+    val emailCursor = collection.find(MongoDBObject(Email.TYPE -> emailType)).toList
+
+    for { x <- emailCursor } yield Email(x)
+  }
+
   def byCaseIdsAndEmailTypes(caseIds: Iterable[ObjectId], emailTypes: Seq[String]): Imports.DBObject =
     $and(Email.CASE_ID $in caseIds, Email.TYPE $in emailTypes)
 

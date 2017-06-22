@@ -136,6 +136,16 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
     }
   }
 
+  "findByEmailType" should {
+    "Return all emails by email type" in {
+      val provisionalAcceptanceEmail1 = insertEmail(caseId = Some(new ObjectId()), emailType = PROVISIONAL_ACCEPTANCE)
+      val provisionalAcceptanceEmail2 = insertEmail(caseId = Some(new ObjectId()), emailType = PROVISIONAL_ACCEPTANCE)
+      insertEmail(caseId = Some(new ObjectId()), emailType = FAILED_CREDIBILITY_CHECK)
+
+      repository.findByEmailType(PROVISIONAL_ACCEPTANCE) mustEqual Seq(provisionalAcceptanceEmail1, provisionalAcceptanceEmail2)
+    }
+  }
+
   "findCaseIdsForEmailAlreadySent" should {
     "Return all case ids for which email already sent" in {
       val _caseId = new ObjectId()
