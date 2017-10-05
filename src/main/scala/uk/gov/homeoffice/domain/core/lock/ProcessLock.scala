@@ -56,10 +56,10 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
 
   def obtainLock(name: String, host: String): Option[Lock] = try {
     findOne(MongoDBObject("name" -> name), ReadPreference.primaryPreferred).fold(newLock(name, host)) { l =>
+      val isSameHost = if (host == l.host) Some(l) else None
       if (minutesBetween(l.createdAt, DateTime.now).getMinutes >= EXPIRY_PERIOD_MINS) {
-        releaseLock(l)
-        newLock(name, host)
-      } else None
+        if (releaseLock(l)) newLock(name, host) else isSameHost
+      } else isSameHost
     }
   } catch {
     case e: Throwable =>
