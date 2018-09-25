@@ -1,5 +1,5 @@
 RTP Email Library - Scala library to work with Emails
-==============================================================
+======================================================
 
 Application built with the following (main) technologies:
 
