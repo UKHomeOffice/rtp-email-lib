@@ -8,6 +8,13 @@ val root = Project(id = moduleName, base = file(".")).enablePlugins(ReleasePlugi
     crossScalaVersions := Seq("2.11.8", "2.12.6")
   )
 
+credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+resolvers ++= Seq(
+  "Artifactory Snapshot Realm" at "http://artifactory.registered-traveller.homeoffice.gov.uk/artifactory/libs-snapshot-local/",
+  "Artifactory Release Realm" at "http://artifactory.registered-traveller.homeoffice.gov.uk/artifactory/libs-release-local/",
+  "Artifactory External Release Local Realm" at "http://artifactory.registered-traveller.homeoffice.gov.uk/artifactory/ext-release-local/"
+)
+
 libraryDependencies ++= Seq(
   "joda-time" % "joda-time" % "2.5",
   "org.joda" % "joda-convert" % "1.7",
