@@ -25,8 +25,8 @@ libraryDependencies ++= Seq(
   "com.github.finagle" %% "finch-core" % "0.21.0",
   "com.github.finagle" %% "finch-circe" % "0.21.0",
   "io.circe" %% "circe-generic" % "0.9.0",
-  "uk.gov.homeoffice" %% "rtp-io-lib" % "1.9.11-SNAPSHOT",
-  "uk.gov.homeoffice" %% "rtp-test-lib" % "1.4.4-SNAPSHOT",
+  "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.0",
+  "uk.gov.homeoffice" %% "rtp-test-lib" % "1.6.6-g6f56307",
   "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.0.16-SNAPSHOT",
   "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.0.16-SNAPSHOT" % Test classifier "tests"
 )
@@ -48,7 +48,7 @@ val branchTag = if (git.gitCurrentBranch.value == "master") "" else "-" + git.gi
 val uncommit = if (git.gitUncommittedChanges.value) "-U" else ""
 
 tag match {
-  case v if v.matches("v\\d+.\\d+") => Some(s"$v.0${branchTag}${uncommit}".drop(1))
+  case v if v.matches("v\\d+.\\d+") => Some(s"$v.0${uncommit}".drop(1))
   case v if v.matches("v\\d+.\\d+-.*") => Some(s"${v.replaceFirst("-",".")}${branchTag}${uncommit}".drop(1))
   case _ => None
 }}
