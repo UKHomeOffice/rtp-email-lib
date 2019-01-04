@@ -41,7 +41,7 @@ publishArtifact in (Test, packageDoc) := true
 publishArtifact in (Test, packageSrc) := true
 
 git.useGitDescribe := true
-git.gitDescribePatterns := Seq("v*.*")
+git.gitDescribePatterns := Seq("v?.?")
 git.gitTagToVersionNumber := { tag :String =>
 
 val branchTag = if (git.gitCurrentBranch.value == "master") "" else "-" + git.gitCurrentBranch.value
