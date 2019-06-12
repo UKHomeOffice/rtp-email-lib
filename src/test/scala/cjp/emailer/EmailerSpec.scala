@@ -17,17 +17,18 @@ class EmailerSpec extends Specification with Mockito {
     val sender = EmailAddress("", "")
     val replyTo = EmailAddress("", "")
     val emailer = new Emailer(emailRepository, emailSender, sender, Some(replyTo), 5, processLockRepository)
-    val PROVISIONAL_ACCEPTANCE = "PROVISIONAL_ACCEPTANCE"  
+    val PROVISIONAL_ACCEPTANCE = "PROVISIONAL_ACCEPTANCE"
   }
-  
+
   "Emailer" should {
     "sendEmails zero emails if no emails in queue" in new Context {
       emailRepository.findByStatus(STATUS_WAITING) returns List()
 
-      emailer.sendEmails()
+      val result = emailer.sendEmails()
 
       there was no(emailSender).sendMessage(any, anyString, any[List[String]], anyString, anyString, any, any, any)
       there was no(emailRepository).updateStatus(anyString, any)
+      result mustEqual List.empty
     }
 
     "sendEmails should send an email and set the status to sent for all emails in the queue" in new Context {
@@ -56,10 +57,11 @@ class EmailerSpec extends Specification with Mockito {
       val emailList = List(emailObj1, emailObj2)
       emailRepository.findByStatus(STATUS_WAITING) returns emailList
 
-      emailer.sendEmails()
+      val result = emailer.sendEmails()
 
       there were two(emailSender).sendMessage(any, anyString, any[List[String]], anyString, any, any, any, any)
       there were two(emailRepository).updateStatus(anyString, any)
+      result mustEqual List((emailObj1, STATUS_SENT), (emailObj2, STATUS_SENT))
     }
   }
 }
