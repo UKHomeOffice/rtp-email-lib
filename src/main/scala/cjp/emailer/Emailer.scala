@@ -12,25 +12,31 @@ class Emailer(emailRepository: EmailRepository, emailSender: EmailSender, sender
   def sendEmails() = try {
     val emailsToSend = emailRepository.findByStatus(STATUS_WAITING)
 
-    emailsToSend.foreach(sendEmail)
+    emailsToSend.map { email =>
+      val newStatus = sendEmail(email)
+      (email, newStatus)
+    }
   } catch {
-    case e: Exception => logger.error(e.getMessage)
+    case e: Exception =>
+      logger.error(e.getMessage)
+      Nil
   }
 
-  def sendEmail(email: Email) = {
-    try {
-      logger.info(s"Sending email to ${email.recipient}")
-      emailSender.sendMessage(sender = sender, recipient = email.recipient, ccList = email.cc, subject = email.subject, message = email.text, html = Some(email.html), replyTo = replyTo)
-      logger.info("Marking email as sent")
-      emailRepository.updateStatus(email.emailId, STATUS_SENT)
-    } catch {
-      case e: EmailException =>
-        logger.error(e.getMessage, e)
-        emailRepository.updateStatus(email.emailId, STATUS_EMAIL_ADDRESS_ERROR)
+  def sendEmail(email: Email) = try {
+    logger.info(s"Sending email to ${email.recipient}")
+    emailSender.sendMessage(sender = sender, recipient = email.recipient, ccList = email.cc, subject = email.subject, message = email.text, html = Some(email.html), replyTo = replyTo)
+    logger.info("Marking email as sent")
+    emailRepository.updateStatus(email.emailId, STATUS_SENT)
+    STATUS_SENT
+  } catch {
+    case e: EmailException =>
+      logger.error(e.getMessage, e)
+      emailRepository.updateStatus(email.emailId, STATUS_EMAIL_ADDRESS_ERROR)
+      STATUS_EMAIL_ADDRESS_ERROR
 
-      case e: Exception =>
-        logger.error(e.getMessage, e)
-    }
+    case e: Exception =>
+      logger.error(e.getMessage, e)
+      STATUS_WAITING
   }
 
   def start() = while (true) {
