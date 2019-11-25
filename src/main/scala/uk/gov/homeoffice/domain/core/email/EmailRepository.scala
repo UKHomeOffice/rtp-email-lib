@@ -3,9 +3,9 @@ package uk.gov.homeoffice.domain.core.email
 import com.mongodb.casbah.Imports
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.commons.MongoDBObject
+import grizzled.slf4j.Logging
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
-import grizzled.slf4j.Logging
 import uk.gov.homeoffice.mongo.casbah.{MongoSupport, Repository}
 
 trait EmailRepository extends Repository with MongoSupport with Logging {
@@ -24,19 +24,19 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
   def findByCaseId(caseId: String): List[Email] = {
     val emailCursor = collection.find(MongoDBObject(Email.CASE_ID -> new ObjectId(caseId))).sort(orderBy = MongoDBObject(Email.DATE -> -1)).toList
 
-    for { x <- emailCursor } yield Email(x)
+    for {x <- emailCursor} yield Email(x)
   }
 
   def findByCaseIdAndType(caseId: String, emailType: String): List[Email] = {
     val emailCursor = collection.find(MongoDBObject(Email.CASE_ID -> new ObjectId(caseId), Email.TYPE -> emailType)).toList
 
-    for { x <- emailCursor } yield Email(x)
+    for {x <- emailCursor} yield Email(x)
   }
 
   def findForCasesAndEmailTypes(caseIds: Iterable[ObjectId], emailTypes: Seq[String]): List[Email] = {
     val emailCursor = collection.find(byCaseIdsAndEmailTypes(caseIds, emailTypes)).toList
 
-    for { x <- emailCursor } yield Email(x)
+    for {x <- emailCursor} yield Email(x)
   }
 
   def findEmailTypesAndCaseIds(caseIds: Iterable[ObjectId], emailTypes: Seq[String]): List[(String, ObjectId)] =
@@ -51,7 +51,7 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
   def findByEmailType(emailType: String): List[Email] = {
     val emailCursor = collection.find(MongoDBObject(Email.TYPE -> emailType)).toList
 
-    for { x <- emailCursor } yield Email(x)
+    for {x <- emailCursor} yield Email(x)
   }
 
   def byCaseIdsAndEmailTypes(caseIds: Iterable[ObjectId], emailTypes: Seq[String]): Imports.DBObject =
@@ -60,7 +60,7 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
   def findByStatus(emailStatus: String): List[Email] = {
     val emailCursor = collection.find(byEmailStatus(emailStatus)).limit(MAX_LIMIT).toList
 
-    for { x <- emailCursor } yield Email(x)
+    for {x <- emailCursor} yield Email(x)
   }
 
   def findByDateRange(from: DateTime, to: Option[DateTime]): List[Email] = {
@@ -70,7 +70,7 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
 
     val emailCursor = collection.find(builder.result()).toList
 
-    for { x <- emailCursor } yield Email(x)
+    for {x <- emailCursor} yield Email(x)
   }
 
   //Excluded html, text and cc from returned query as take up relatively large amount of space when running reports
@@ -78,7 +78,7 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
     val builder = MongoDBObject.empty
 
     val fields = MongoDBObject("user" -> 1, "emailId" -> 1, "caseId" -> 1, "caseRef" -> 1, "date" -> 1,
-    "recipient" -> 1, "subject" -> 1, "status" -> 1, "type" -> 1)
+      "recipient" -> 1, "subject" -> 1, "status" -> 1, "type" -> 1)
 
     builder += Email.DATE -> dateRangeQuery(Some(from), to)
 
@@ -94,16 +94,21 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
     newEmail
   }
 
-  def resend(emailId: String, recipient: String): Email = {
+  def resend(emailId: String, recipient: String, fullName: String): Option[Email] = {
     val email = findByEmailId(emailId)
 
-    val newEmail = email.get.copy(
-      emailId = new ObjectId().toString,
-      recipient = recipient,
-      date = new DateTime,
-      status = EmailStatus.STATUS_WAITING)
+    val newEmail = email.map { e =>
+      e.copy(
+        emailId = new ObjectId().toString,
+        recipient = recipient,
+        date = new DateTime,
+        status = EmailStatus.STATUS_WAITING,
+        text = e.text.replaceAll("Dear(.*)\n", s"Dear $fullName \n"),
+        html = e.html.replaceAll("Dear(.*)</p>", s"Dear $fullName </p>")
+      )
+    }
 
-    insert(newEmail)
+    newEmail.map(insert)
     newEmail
   }
 
