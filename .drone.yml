@@ -31,7 +31,7 @@ pipeline:
       event:
         - push
         - tag
-      branch: master
+#      branch: master
 
 services:
   database:
