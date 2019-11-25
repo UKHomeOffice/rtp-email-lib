@@ -13,8 +13,8 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
   val MEMBERSHIP_EXPIRES_SOON = "expiring soon"
   val now = new DateTime()
 
-  def insertEmail(caseId: Option[ObjectId] = Some(new ObjectId()), emailType: String = PROVISIONAL_ACCEPTANCE, html: String = "html") = {
-    val email = EmailBuilder(caseId = caseId, html = html, emailType = emailType, date = now)
+  def insertEmail(caseId: Option[ObjectId] = Some(new ObjectId()), emailType: String = PROVISIONAL_ACCEPTANCE, html: String = "html", text: String = "text") = {
+    val email = EmailBuilder(caseId = caseId, html = html, emailType = emailType, date = now, text = text)
     repository.insert(email)
     email
   }
@@ -88,11 +88,26 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
 
     "create a new Email with new recipient" in {
       val emailObj = insertEmail()
-      val newEmail = repository.resend(emailObj.emailId, "peppa pig")
+      val Some(newEmail) = repository.resend(emailObj.emailId, "peppa pig", "peppa pig")
       val Some(foundEmail) = repository.findByEmailId(newEmail.emailId)
       foundEmail.status mustEqual STATUS_WAITING
       foundEmail.recipient mustEqual "peppa pig"
+
+
     }
+
+    "create a new Email with new recipient and new name" in {
+      val text = "Dear FirstName LastName \n this is sample email."
+      val emailObj = insertEmail(html = s"<html><p>Dear FirstName LastName </p>\n this is sample email.</html>", text = text)
+      val Some(newEmail) = repository.resend(emailObj.emailId, "peppa pig", "Peppa Pig")
+      val Some(foundEmail) = repository.findByEmailId(newEmail.emailId)
+      foundEmail.status mustEqual STATUS_WAITING
+      foundEmail.recipient mustEqual "peppa pig"
+      foundEmail.html mustEqual "<html><p>Dear Peppa Pig </p>\n this is sample email.</html>"
+      foundEmail.text mustEqual "Dear Peppa Pig \n this is sample email."
+    }
+
+
   }
 
   "insert record" should {
