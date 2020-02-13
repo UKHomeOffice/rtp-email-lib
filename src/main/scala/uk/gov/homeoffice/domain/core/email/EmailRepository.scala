@@ -98,13 +98,15 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
     val email = findByEmailId(emailId)
 
     val newEmail = email.map { e =>
+      val html = e.html.replaceAll("<!-- NAME_START -->(.*)<!-- NAME_END -->", s"<!-- NAME_START -->$fullName<!-- NAME_END -->")
+
       e.copy(
         emailId = new ObjectId().toString,
         recipient = recipient,
         date = new DateTime,
         status = EmailStatus.STATUS_WAITING,
-        text = e.text.replaceAll("Dear(.*)\n", s"Dear $fullName \n"),
-        html = e.html.replaceAll("Dear(.*)</p>", s"Dear $fullName </p>")
+        html = html,
+        text = HtmlStripper.bodyText(html)
       )
     }
 
