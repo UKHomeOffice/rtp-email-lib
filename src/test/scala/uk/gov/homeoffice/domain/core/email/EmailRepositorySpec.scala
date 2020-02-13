@@ -97,14 +97,14 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
     }
 
     "create a new Email with new recipient and new name" in {
-      val text = "Dear FirstName LastName \n this is sample email."
-      val emailObj = insertEmail(html = s"<html><p>Dear FirstName LastName </p>\n this is sample email.</html>", text = text)
+      val text = "Dear FirstName LastName \n this is sample email. UK Access Code for FirstName LastName: UK101"
+      val emailObj = insertEmail(html = s"<html><p>Dear FirstName LastName </p>\n this is sample email. UK Access Code for FirstName LastName: UK101</html>", text = text)
       val Some(newEmail) = repository.resend(emailObj.emailId, "peppa pig", "Peppa Pig")
       val Some(foundEmail) = repository.findByEmailId(newEmail.emailId)
       foundEmail.status mustEqual STATUS_WAITING
       foundEmail.recipient mustEqual "peppa pig"
-      foundEmail.html mustEqual "<html><p>Dear Peppa Pig </p>\n this is sample email.</html>"
-      foundEmail.text mustEqual "Dear Peppa Pig \n this is sample email."
+      foundEmail.html mustEqual "<html><p>Dear Peppa Pig</p>\n this is sample email. UK Access Code for Peppa Pig: UK101</html>"
+      foundEmail.text mustEqual "Dear Peppa Pig\n this is sample email. UK Access Code for Peppa Pig: UK101"
     }
 
 
