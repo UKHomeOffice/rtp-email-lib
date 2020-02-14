@@ -78,38 +78,6 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
     }
   }
 
-  "resend" should {
-    "create a new Email" in {
-      val emailObj = insertEmail()
-      val newEmail = repository.resend(emailObj.emailId)
-      val Some(foundEmail) = repository.findByEmailId(newEmail.emailId)
-      foundEmail.status mustEqual STATUS_WAITING
-    }
-
-    "create a new Email with new recipient" in {
-      val emailObj = insertEmail()
-      val Some(newEmail) = repository.resend(emailObj.emailId, "peppa pig", "peppa pig")
-      val Some(foundEmail) = repository.findByEmailId(newEmail.emailId)
-      foundEmail.status mustEqual STATUS_WAITING
-      foundEmail.recipient mustEqual "peppa pig"
-
-
-    }
-
-    "create a new Email with new recipient and new name" in {
-      val text = "Dear FirstName LastName \n this is sample email. UK Access Code for FirstName LastName: UK101"
-      val emailObj = insertEmail(html = s"<html><p>Dear FirstName LastName </p>\n this is sample email. UK Access Code for FirstName LastName: UK101</html>", text = text)
-      val Some(newEmail) = repository.resend(emailObj.emailId, "peppa pig", "Peppa Pig")
-      val Some(foundEmail) = repository.findByEmailId(newEmail.emailId)
-      foundEmail.status mustEqual STATUS_WAITING
-      foundEmail.recipient mustEqual "peppa pig"
-      foundEmail.html mustEqual "<html><p>Dear Peppa Pig</p>\n this is sample email. UK Access Code for Peppa Pig: UK101</html>"
-      foundEmail.text mustEqual "Dear Peppa Pig\n this is sample email. UK Access Code for Peppa Pig: UK101"
-    }
-
-
-  }
-
   "insert record" should {
     "contain the correct html" in {
       val templateHtml = "<html><title>Hello</title></html>"
