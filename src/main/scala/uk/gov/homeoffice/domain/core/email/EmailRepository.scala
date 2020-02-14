@@ -102,6 +102,7 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
         recipient = recipient,
         date = new DateTime,
         status = EmailStatus.STATUS_WAITING,
+        subject = replaceSubject(email.subject),
         text = replaceNameText(email.text, fullName),
         html = replaceNameHtml(email.html, fullName)
       )
@@ -123,6 +124,10 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
       .replaceAll("Dear(.*?)\n", s"Dear ${fullName}\n")
       .replaceAll("UK Access Code for(.*?):", s"UK Access Code for ${fullName}:")
       .replaceAll("This code can only be used by(.*?).", s"This code can only be used by $fullName.")
+  }
+
+  private def replaceSubject(in :String, fullName :String) = {
+    in.replaceAll("Global Entry: (.*)’s UK Access Code", s"Global Entry: ${fullName}'s UK Access Code")
   }
 
   def updateStatus(emailId: String, newStatus: String) =
