@@ -87,49 +87,6 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
 
   def byEmailStatus(emailStatus: String): Imports.DBObject = MongoDBObject(Email.STATUS -> emailStatus)
 
-  def resend(emailId: String): Email = {
-    val email = findByEmailId(emailId)
-    val newEmail = email.get.copy(emailId = new ObjectId().toString, date = new DateTime, status = EmailStatus.STATUS_WAITING)
-    insert(newEmail)
-    newEmail
-  }
-
-  def resend(emailId: String, recipient: String, fullName: String): Option[Email] = {
-    findByEmailId(emailId).map { email =>
-
-      val newEmail = email.copy(
-        emailId = new ObjectId().toString,
-        recipient = recipient,
-        date = new DateTime,
-        status = EmailStatus.STATUS_WAITING,
-        subject = replaceSubject(email.subject, fullName),
-        text = replaceNameText(email.text, fullName),
-        html = replaceNameHtml(email.html, fullName)
-      )
-
-      insert(newEmail)
-      newEmail
-    }
-  }
-
-  private def replaceNameHtml(in :String, fullName :String) = {
-    in
-      .replaceAll("Dear(.*?)</p>", s"Dear ${fullName}</p>")
-      .replaceAll("UK Access Code for(.*?):", s"UK Access Code for ${fullName}:")
-      .replaceAll("This code can only be used by(.*?).", s"This code can only be used by $fullName.")
-  }
-
-  private def replaceNameText(in :String, fullName :String) = {
-    in
-      .replaceAll("Dear(.*?)\n", s"Dear ${fullName}\n")
-      .replaceAll("UK Access Code for(.*?):", s"UK Access Code for ${fullName}:")
-      .replaceAll("This code can only be used by(.*). It's not transferable", s"This code can only be used by $fullName. It's not transferable")
-  }
-
-  private def replaceSubject(in :String, fullName :String) = {
-    in.replaceAll("Global Entry: (.*)’s UK Access Code", s"Global Entry: ${fullName}'s UK Access Code")
-  }
-
   def updateStatus(emailId: String, newStatus: String) =
     collection.update(MongoDBObject(Email.EMAIL_ID -> new ObjectId(emailId)), $set(Email.STATUS -> newStatus))
 
