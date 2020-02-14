@@ -95,21 +95,39 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
   }
 
   def resend(emailId: String, recipient: String, fullName: String): Option[Email] = {
-    val email = findByEmailId(emailId)
+    findByEmailId(emailId).map { email =>
 
-    val newEmail = email.map { e =>
-      e.copy(
+      val newEmail = email.copy(
         emailId = new ObjectId().toString,
         recipient = recipient,
         date = new DateTime,
         status = EmailStatus.STATUS_WAITING,
-        text = e.text.replaceAll("Dear(.*)\n", s"Dear $fullName \n"),
-        html = e.html.replaceAll("Dear(.*)</p>", s"Dear $fullName </p>")
+        subject = replaceSubject(email.subject, fullName),
+        text = replaceNameText(email.text, fullName),
+        html = replaceNameHtml(email.html, fullName)
       )
-    }
 
-    newEmail.map(insert)
-    newEmail
+      insert(newEmail)
+      newEmail
+    }
+  }
+
+  private def replaceNameHtml(in :String, fullName :String) = {
+    in
+      .replaceAll("Dear(.*?)</p>", s"Dear ${fullName}</p>")
+      .replaceAll("UK Access Code for(.*?):", s"UK Access Code for ${fullName}:")
+      .replaceAll("This code can only be used by(.*?).", s"This code can only be used by $fullName.")
+  }
+
+  private def replaceNameText(in :String, fullName :String) = {
+    in
+      .replaceAll("Dear(.*?)\n", s"Dear ${fullName}\n")
+      .replaceAll("UK Access Code for(.*?):", s"UK Access Code for ${fullName}:")
+      .replaceAll("This code can only be used by(.*?).", s"This code can only be used by $fullName.")
+  }
+
+  private def replaceSubject(in :String, fullName :String) = {
+    in.replaceAll("Global Entry: (.*)’s UK Access Code", s"Global Entry: ${fullName}'s UK Access Code")
   }
 
   def updateStatus(emailId: String, newStatus: String) =
