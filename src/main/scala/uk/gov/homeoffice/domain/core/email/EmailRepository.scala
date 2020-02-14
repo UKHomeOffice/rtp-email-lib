@@ -102,7 +102,7 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
         recipient = recipient,
         date = new DateTime,
         status = EmailStatus.STATUS_WAITING,
-        subject = replaceSubject(email.subject),
+        subject = replaceSubject(email.subject, fullName),
         text = replaceNameText(email.text, fullName),
         html = replaceNameHtml(email.html, fullName)
       )
