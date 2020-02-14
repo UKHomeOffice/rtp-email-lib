@@ -123,7 +123,7 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
     in
       .replaceAll("Dear(.*?)\n", s"Dear ${fullName}\n")
       .replaceAll("UK Access Code for(.*?):", s"UK Access Code for ${fullName}:")
-      .replaceAll("This code can only be used by(.*?). It's not transferable", s"This code can only be used by $fullName. It's not transferable")
+      .replaceAll("This code can only be used by(.*). It's not transferable", s"This code can only be used by $fullName. It's not transferable")
   }
 
   private def replaceSubject(in :String, fullName :String) = {
