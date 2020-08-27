@@ -19,6 +19,7 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
     email
   }
 
+
   "email repository" should {
     "find Email by caseId" in {
       val email = insertEmail()
@@ -67,6 +68,13 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
           email.text must beNull
       }
     }
+
+    "find email by recipient email" in {
+      val emailObj = insertEmail()
+      val emailDocs = repository.findByRecipientEmailIdAndType(emailObj.recipient,PROVISIONAL_ACCEPTANCE)
+      emailDocs.size mustEqual 1
+      emailDocs.head.emailId mustEqual emailObj.emailId
+    }
   }
 
   "updateStatus" should {
@@ -99,6 +107,22 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
       repository.findByCaseId(allCaseIds.head).size mustEqual 0
       repository.findByCaseId(allCaseIds(1)).size mustEqual 1
       repository.findByCaseId(allCaseIds(2)).size mustEqual 1
+    }
+  }
+
+  "updateDate" should {
+    "update date older than 7 days" in {
+      val emailObj = insertEmail()
+      repository.updateDate(emailObj.emailId, DateTime.now().withTimeAtStartOfDay().minusDays(7))
+      val Some(updatedEmail) = repository.findByEmailId(emailObj.emailId)
+      updatedEmail.date isBefore DateTime.now().minusDays(7)
+    }
+
+    "update date younger than 7 days" in {
+      val emailObj = insertEmail()
+      repository.updateDate(emailObj.emailId, DateTime.now().withTimeAtStartOfDay().plusDays(7))
+      val Some(updatedEmail) = repository.findByEmailId(emailObj.emailId)
+      updatedEmail.date isBefore DateTime.now().plusDays(7)
     }
   }
 
