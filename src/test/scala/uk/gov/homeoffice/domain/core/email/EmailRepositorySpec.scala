@@ -13,8 +13,8 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
   val MEMBERSHIP_EXPIRES_SOON = "expiring soon"
   val now = new DateTime()
 
-  def insertEmail(caseId: Option[ObjectId] = Some(new ObjectId()), emailType: String = PROVISIONAL_ACCEPTANCE, html: String = "html", text: String = "text") = {
-    val email = EmailBuilder(caseId = caseId, html = html, emailType = emailType, date = now, text = text)
+  def insertEmail(caseId: Option[ObjectId] = Some(new ObjectId()), emailType: String = PROVISIONAL_ACCEPTANCE, html: String = "html", text: String = "text", date: DateTime = now) = {
+    val email = EmailBuilder(caseId = caseId, html = html, emailType = emailType, date = date, text = text)
     repository.insert(email)
     email
   }
@@ -71,7 +71,7 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
 
     "find email by recipient email" in {
       val emailObj = insertEmail()
-      val emailDocs = repository.findByRecipientEmailIdAndType(emailObj.recipient,PROVISIONAL_ACCEPTANCE)
+      val emailDocs = repository.findByRecipientEmailIdAndType(emailObj.recipient, PROVISIONAL_ACCEPTANCE)
       emailDocs.size mustEqual 1
       emailDocs.head.emailId mustEqual emailObj.emailId
     }
@@ -182,5 +182,74 @@ class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification 
 
       caseIds must haveSize(0)
     }
+  }
+
+  "findUserInactiveWarningEmail" should {
+    "return Inactive email" in {
+      val _caseId = new ObjectId()
+      val emailTypeObject1 = ObjectId.get()
+      val emailTypeObject2 = ObjectId.get()
+
+      val emailType1 = "email type 1"
+      val emailType2 = "email type 2"
+
+      insertEmail(caseId = Some(_caseId), emailType = "email type")
+      insertEmail(caseId = Some(emailTypeObject1), emailType = emailType1)
+      insertEmail(caseId = Some(emailTypeObject2), emailType = emailType2)
+      val emails = repository.findUserInactiveWarningEmail(List(emailType1, emailType2), 1)
+
+      emails.size mustEqual 2
+
+      emails.count(_.emailType == emailType1) mustEqual 1
+
+      emails.count(_.emailType == emailType2) mustEqual 1
+
+    }
+
+
+    "return Inactive email within 1 day" in {
+      val _caseId = new ObjectId()
+      val emailTypeObject1 = ObjectId.get()
+      val emailTypeObject2 = ObjectId.get()
+
+      val emailType1 = "email type 1"
+
+      val emailType2 = "email type 2"
+
+      insertEmail(caseId = Some(_caseId), emailType = "email type")
+      insertEmail(caseId = Some(emailTypeObject1), emailType = emailType1, date = DateTime.now.minusDays(2))
+      insertEmail(caseId = Some(emailTypeObject2), emailType = emailType2)
+      val emails = repository.findUserInactiveWarningEmail(List(emailType1, emailType2), 1)
+
+      emails.size mustEqual 1
+
+      emails.count(_.emailType == emailType1) mustEqual 0
+
+      emails.count(_.emailType == emailType2) mustEqual 1
+
+    }
+
+    "returns no Inactive email within n day" in {
+      val _caseId = new ObjectId()
+      val emailTypeObject1 = ObjectId.get()
+      val emailTypeObject2 = ObjectId.get()
+
+      val emailType1 = "email type 1"
+
+      val emailType2 = "email type 2"
+
+      insertEmail(caseId = Some(_caseId), emailType = "email type")
+      insertEmail(caseId = Some(emailTypeObject1), emailType = emailType1, date = DateTime.now.minusDays(2))
+      insertEmail(caseId = Some(emailTypeObject2), emailType = emailType2, date = DateTime.now.minusDays(2))
+      val emails = repository.findUserInactiveWarningEmail(List(emailType1, emailType2), 1)
+
+      emails.size mustEqual 0
+
+      emails.count(_.emailType == emailType1) mustEqual 0
+
+      emails.count(_.emailType == emailType2) mustEqual 0
+
+    }
+
   }
 }
