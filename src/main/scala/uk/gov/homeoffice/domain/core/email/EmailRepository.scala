@@ -22,7 +22,7 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
     }
 
   def findByRecipientEmailIdAndType(recipientEmailId: String, emailType: String ) = {
-    val emailCursor = collection.find(byRecipientEmailIdAndEmailTypes(recipientEmailId, emailType)).sort(orderBy = MongoDBObject(Email.DATE -> -1)).toList
+    val emailCursor = collection.find(byRecipientEmailIdAndEmailTypes(recipientEmailId, emailType)).sort(orderBy = MongoDBObject(Email.DATE -> -1)).limit(1).toList
     for {x <- emailCursor} yield Email(x)
 
   }
