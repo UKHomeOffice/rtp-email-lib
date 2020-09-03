@@ -21,6 +21,17 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
       case None => None
     }
 
+  def findByRecipientEmailIdAndType(recipientEmailId: String, emailType: String) = {
+    val emailCursor = collection.find(byRecipientEmailIdAndEmailTypes(recipientEmailId, emailType)).sort(orderBy = MongoDBObject(Email.DATE -> -1)).limit(1).toList
+    for {x <- emailCursor} yield Email(x)
+
+  }
+
+  def findUserInactiveWarningEmail(emailTypes: List[String], days: Int) = {
+    val emailCursor = collection.find(byEmailTypesAndDate(emailTypes, days)).sort(orderBy = MongoDBObject(Email.DATE -> -1)).toList
+    for {x <- emailCursor} yield Email(x)
+  }
+
   def findByCaseId(caseId: String): List[Email] = {
     val emailCursor = collection.find(MongoDBObject(Email.CASE_ID -> new ObjectId(caseId))).sort(orderBy = MongoDBObject(Email.DATE -> -1)).toList
 
@@ -53,6 +64,15 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
 
     for {x <- emailCursor} yield Email(x)
   }
+
+
+  def byEmailTypesAndDate(emailTypes: List[String], days: Int): Imports.DBObject =
+    $and(Email.TYPE $in emailTypes, Email.DATE $gte DateTime.now.minusDays(days))
+
+
+  def byRecipientEmailIdAndEmailTypes(recipientEmailId: String, emailTypes: String): Imports.DBObject =
+    $and(Email.RECIPIENT $eq recipientEmailId, Email.TYPE $eq emailTypes)
+
 
   def byCaseIdsAndEmailTypes(caseIds: Iterable[ObjectId], emailTypes: Seq[String]): Imports.DBObject =
     $and(Email.CASE_ID $in caseIds, Email.TYPE $in emailTypes)
@@ -89,6 +109,9 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
 
   def updateStatus(emailId: String, newStatus: String) =
     collection.update(MongoDBObject(Email.EMAIL_ID -> new ObjectId(emailId)), $set(Email.STATUS -> newStatus))
+
+  def updateDate(emailId: String, newDate: DateTime) =
+    collection.update(MongoDBObject(Email.EMAIL_ID -> new ObjectId(emailId)), $set(Email.DATE -> newDate))
 
   def removeByCaseId(caseId: String): Unit =
     collection remove MongoDBObject(Email.CASE_ID -> new ObjectId(caseId))
