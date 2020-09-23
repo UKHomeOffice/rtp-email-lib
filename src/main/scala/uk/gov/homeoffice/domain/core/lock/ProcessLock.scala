@@ -79,7 +79,7 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
 }
 
 trait ProcessLocking {
-  val processLockRepository: ProcessLockRepository
+  def processLockRepository: ProcessLockRepository
 
   lazy val host = InetAddress.getLocalHost.getHostName
 
