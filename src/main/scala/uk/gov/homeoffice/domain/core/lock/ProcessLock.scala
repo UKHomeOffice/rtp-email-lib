@@ -1,13 +1,14 @@
 package uk.gov.homeoffice.domain.core.lock
 
 import java.net.InetAddress
+
 import com.mongodb.DBObject
 import com.mongodb.casbah.ReadPreference
 import com.mongodb.casbah.commons.MongoDBObject
+import grizzled.slf4j.Logging
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 import org.joda.time.Minutes.minutesBetween
-import grizzled.slf4j.Logging
 import uk.gov.homeoffice.domain.core.lock.ProcessLockRepository.EXPIRY_PERIOD_MINS
 import uk.gov.homeoffice.mongo.salat.Repository
 
@@ -56,10 +57,10 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
 
   def obtainLock(name: String, host: String): Option[Lock] = try {
     findOne(MongoDBObject("name" -> name), ReadPreference.primaryPreferred).fold(newLock(name, host)) { l =>
-      val isSameHost = if (host == l.host) Some(l) else None
+      val isSameName = if (name == l.name) Some(l) else None
       if (minutesBetween(l.createdAt, DateTime.now).getMinutes >= EXPIRY_PERIOD_MINS) {
-        if (releaseLock(l)) newLock(name, host) else isSameHost
-      } else isSameHost
+        if (releaseLock(l)) newLock(name, host) else isSameName
+      } else isSameName
     }
   } catch {
     case e: Throwable =>
