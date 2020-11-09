@@ -65,7 +65,7 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
     }
   } catch {
     case e: Throwable =>
-      warn(s"error obtaining lock: $name from host: $host. continuing .. ", e)
+      warn(s"error obtaining lock: $name from host: $host. continuing .. ${e.getMessage}")
       None
   }
 
