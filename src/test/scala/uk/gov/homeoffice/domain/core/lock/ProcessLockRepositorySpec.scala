@@ -27,7 +27,10 @@ class ProcessLockRepositorySpec extends Specification with MongoSpecification {
 
       val lock: Option[Lock] = repository.obtainLock("SOME_LOCK", "SOME_HOST")
 
-      lock mustEqual None
+      lock.get.name mustEqual "SOME_LOCK"
+      lock.get.host  mustEqual "SOME_OTHER_HOST"
+      lock.get.createdAt mustEqual now
+
       val savedLock = repository.findOne(MongoDBObject("name" -> "SOME_LOCK")).get
 
       savedLock.host mustEqual "SOME_OTHER_HOST"
