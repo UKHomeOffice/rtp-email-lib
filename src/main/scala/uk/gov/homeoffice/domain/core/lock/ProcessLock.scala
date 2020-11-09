@@ -50,8 +50,11 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
     debug(s"Lock : $name acquired by host : $host")
     Some(lock)
   } catch {
-    case e: Throwable =>
-      warn(s"error creating new lock: $name from host: $host. continuing .. ${e.getMessage}")
+    case _: salat.dao.SalatInsertError =>
+      debug(s"duplicate key error creating new lock: $name from host: $host. continuing ..")
+      None
+    case t: Throwable =>
+      warn(s"error creating new lock: $name from host: $host. continuing .. ", t)
       None
   }
 
