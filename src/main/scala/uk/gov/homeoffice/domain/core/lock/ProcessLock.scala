@@ -1,13 +1,14 @@
 package uk.gov.homeoffice.domain.core.lock
 
 import java.net.InetAddress
+
 import com.mongodb.DBObject
 import com.mongodb.casbah.ReadPreference
 import com.mongodb.casbah.commons.MongoDBObject
+import grizzled.slf4j.Logging
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 import org.joda.time.Minutes.minutesBetween
-import grizzled.slf4j.Logging
 import uk.gov.homeoffice.domain.core.lock.ProcessLockRepository.EXPIRY_PERIOD_MINS
 import uk.gov.homeoffice.mongo.salat.Repository
 
@@ -49,17 +50,21 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
     debug(s"Lock : $name acquired by host : $host")
     Some(lock)
   } catch {
-    case e: Throwable =>
-      warn(s"error creating new lock: $name from host: $host. continuing .. ", e)
+    case _: salat.dao.SalatInsertError =>
+      debug(s"duplicate key error creating new lock: $name from host: $host. continuing ..")
+      None
+    case t: Throwable =>
+      warn(s"error creating new lock: $name from host: $host. continuing .. ", t)
       None
   }
 
   def obtainLock(name: String, host: String): Option[Lock] = try {
-    findOne(MongoDBObject("name" -> name), ReadPreference.primaryPreferred).fold(newLock(name, host)) { l =>
-      val isSameHost = if (host == l.host) Some(l) else None
-      if (minutesBetween(l.createdAt, DateTime.now).getMinutes >= EXPIRY_PERIOD_MINS) {
-        if (releaseLock(l)) newLock(name, host) else isSameHost
-      } else isSameHost
+    findOne(MongoDBObject("name" -> name), ReadPreference.primaryPreferred) match {
+      case Some(l) => if (minutesBetween(l.createdAt, DateTime.now).getMinutes >= EXPIRY_PERIOD_MINS) {
+        if (releaseLock(l)) newLock(name, host) else None
+      } else None
+
+      case None => newLock(name, host)
     }
   } catch {
     case e: Throwable =>
