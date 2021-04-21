@@ -40,8 +40,7 @@ steps:
     event:
     - push
     - tag
-  depends_on:
-    - build
+
 services:
 - name: database
   pull: if-not-exists
