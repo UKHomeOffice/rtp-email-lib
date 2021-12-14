@@ -27,8 +27,8 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic" % "0.9.0",
   "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.5-g588ed6c",
   "uk.gov.homeoffice" %% "rtp-test-lib" % "1.6.6-g6f56307",
-  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.0.16-SNAPSHOT",
-  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.0.16-SNAPSHOT" % Test classifier "tests"
+  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.1.5-g4c83f7",
+  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.1.5-g4c83f7" % Test classifier "tests"
 )
 
 publishTo := {
