@@ -3,10 +3,10 @@ package uk.gov.homeoffice.domain.core.email
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 import org.specs2.mutable.Specification
+import uk.gov.homeoffice.mongo.casbah.MongoSpecification
 import uk.gov.homeoffice.domain.core.email.EmailStatus._
-import uk.gov.homeoffice.mongo.casbah.EmbeddedMongoSpecification
 
-class EmailRepositorySpec extends Specification with EmbeddedMongoSpecification {
+class EmailRepositorySpec extends Specification with MongoSpecification {
   val repository = new EmailRepository with TestMongo
   val PROVISIONAL_ACCEPTANCE = "provisional-acceptance"
   val FAILED_CREDIBILITY_CHECK = "failed-credibility-check"

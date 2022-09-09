@@ -17,14 +17,14 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "joda-time" % "joda-time" % "2.5",
-  "org.joda" % "joda-convert" % "1.7",
-  "org.apache.commons" % "commons-email" % "1.3.2",
-  "commons-io" % "commons-io" % "2.4",
-  "com.icegreen" % "greenmail" % "1.3.1b" % "test",
-  "com.github.finagle" %% "finch-core" % "0.21.0",
-  "com.github.finagle" %% "finch-circe" % "0.21.0",
-  "io.circe" %% "circe-generic" % "0.9.0",
+  "joda-time" % "joda-time" % "2.11.1",
+  "org.joda" % "joda-convert" % "2.2.2",
+  "org.apache.commons" % "commons-email" % "1.5",
+  "commons-io" % "commons-io" % "2.11.0",
+  "com.icegreen" % "greenmail" % "1.6.10" % "test",
+  "com.github.finagle" %% "finch-core" % "0.31.0",
+  "com.github.finagle" %% "finch-circe" % "0.31.0",
+  "io.circe" %% "circe-generic" % "0.11.2",
   "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.5-g588ed6c",
   "uk.gov.homeoffice" %% "rtp-test-lib" % "1.6.6-g6f56307",
   "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.1.5-g4c83f76",
