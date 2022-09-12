@@ -10,7 +10,7 @@ platform:
 steps:
 - name: build
   pull: if-not-exists
-  image: quay.io/ukhomeofficedigital/scala-sbt:v0.3.1
+  image: quay.io/ukhomeofficedigital/scala-sbt:latest
   commands:
   - /root/entrypoint.sh
   - git fetch --tags
@@ -27,7 +27,7 @@ steps:
 
 - name: publish
   pull: if-not-exists
-  image: quay.io/ukhomeofficedigital/scala-sbt:v0.3.1
+  image: quay.io/ukhomeofficedigital/scala-sbt:latest
   commands:
   - /root/entrypoint.sh
   - sbt +publish
