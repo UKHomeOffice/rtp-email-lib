@@ -22,6 +22,7 @@ libraryDependencies ++= Seq(
   "org.joda" % "joda-convert" % "2.2.2",
   "org.apache.commons" % "commons-email" % "1.5",
   "commons-io" % "commons-io" % "2.11.0",
+  "org.apache.commons" % "commons-lang3" % "3.12.0",
   "com.icegreen" % "greenmail" % "1.6.10" % "test",
   "com.github.finagle" %% "finch-core" % "0.31.0",
   "com.github.finagle" %% "finch-circe" % "0.31.0",
