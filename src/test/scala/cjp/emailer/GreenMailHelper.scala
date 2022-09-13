@@ -7,16 +7,17 @@ import javax.mail.Message.RecipientType
 import javax.mail.internet.{MimeMessage, MimeMultipart}
 
 import com.icegreen.greenmail.util.{GreenMail, ServerSetup}
+import com.icegreen.greenmail.configuration.GreenMailConfiguration
 import org.specs2.specification.BeforeAfterEach
 
 import scala.concurrent.duration.FiniteDuration
 
 trait GreenMailHelper extends BeforeAfterEach {
-  override def before() {
+  override def before() :Unit = {
     GreenMailHelper.start()
   }
 
-  override def after() {
+  override def after() :Unit = {
     GreenMailHelper.stop()
   }
 }
@@ -29,8 +30,9 @@ object GreenMailHelper{
   val smtpConfig2 = SmtpConfig(port = port2)
   var greenMail: GreenMail = null
 
-  def initGreenMail(){
+  def initGreenMail() :Unit = {
     greenMail = new GreenMail(new ServerSetup(port, "localhost", "smtp"))
+      .withConfiguration(new GreenMailConfiguration().withDisabledAuthentication())
   }
 
   def getReceivedMessages = greenMail.getReceivedMessages
