@@ -82,17 +82,3 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
       false
   }
 }
-
-trait ProcessLocking {
-  def processLockRepository: ProcessLockRepository
-
-  lazy val host = InetAddress.getLocalHost.getHostName
-
-  def withLock[T](lockName: String)(f: => T) = processLockRepository.obtainLock(lockName, host).map { lock =>
-    try {
-      f
-    } finally {
-      processLockRepository.releaseLock(lock)
-    }
-  }
-}

@@ -26,7 +26,7 @@ class EmailerIntegrationSpec extends Specification with MongoSpecification with 
   "Sending an email message via the Emailer" should {
     "result in that message with invalid email not ending up in the GreenMail message queue" in new Context {
       val emailSender = new EmailSender(GreenMailHelper.smtpConfig)
-      val emailer = new Emailer(emailRepository, emailSender, sender, Some(replyTo), 5, processLockRepository)
+      val emailer = new Emailer(emailRepository, emailSender, sender, Some(replyTo))
 
       val emailObj1 = Email(
         caseId = Some(new ObjectId().toString),
@@ -52,7 +52,7 @@ class EmailerIntegrationSpec extends Specification with MongoSpecification with 
     "result in that message with email ending up in the GreenMail message queue" in new Context {
 
       val emailSender = new EmailSender(GreenMailHelper.smtpConfig)
-      val emailer = new Emailer(emailRepository, emailSender, sender, Some(replyTo), 5, processLockRepository)
+      val emailer = new Emailer(emailRepository, emailSender, sender, Some(replyTo))
 
       val emailObj1 = Email(
         caseId = Some(new ObjectId().toString),

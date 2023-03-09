@@ -7,16 +7,14 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.domain.core.email.EmailStatus._
 import uk.gov.homeoffice.domain.core.email.{Email, EmailRepository}
-import uk.gov.homeoffice.domain.core.lock.ProcessLockRepository
 
 class EmailerSpec extends Specification with Mockito {
   trait Context extends Scope {
     val emailRepository = mock[EmailRepository]
-    val processLockRepository = mock[ProcessLockRepository]
     val emailSender = mock[EmailSender]
     val sender = EmailAddress("", "")
     val replyTo = EmailAddress("", "")
-    val emailer = new Emailer(emailRepository, emailSender, sender, Some(replyTo), 5, processLockRepository)
+    val emailer = new Emailer(emailRepository, emailSender, sender, Some(replyTo))
     val PROVISIONAL_ACCEPTANCE = "PROVISIONAL_ACCEPTANCE"
   }
 
