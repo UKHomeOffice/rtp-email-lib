@@ -4,22 +4,24 @@ import org.apache.commons.mail.EmailException
 import grizzled.slf4j.Logging
 import uk.gov.homeoffice.domain.core.email.EmailStatus._
 import uk.gov.homeoffice.domain.core.email.{Email, EmailRepository}
-import uk.gov.homeoffice.domain.core.lock.{ProcessLockRepository, ProcessLocking}
 
-class Emailer(emailRepository: EmailRepository, emailSender: EmailSender, sender: EmailAddress, replyTo: Option[EmailAddress] = None, pollingFrequency: Int, override val processLockRepository: ProcessLockRepository) extends ProcessLocking with Logging {
+class Emailer(emailRepository: EmailRepository, emailSender: EmailSender, sender: EmailAddress, replyTo: Option[EmailAddress] = None) extends Logging {
   private val emailType = "WAITING_CUSTOMER_EMAILS"
 
-  def sendEmails() = try {
+  def sendEmails() :Either[String, List[(Email, String)]] = try {
     val emailsToSend = emailRepository.findByStatus(STATUS_WAITING)
 
-    emailsToSend.map { email =>
+    val results = emailsToSend.map { email =>
       val newStatus = sendEmail(email)
       (email, newStatus)
     }
+
+    Right(results)
+
   } catch {
     case e: Exception =>
       logger.error(e.getMessage)
-      Nil
+      Left(e.getMessage)
   }
 
   def sendEmail(email: Email) = try {
@@ -39,12 +41,4 @@ class Emailer(emailRepository: EmailRepository, emailSender: EmailSender, sender
       STATUS_WAITING
   }
 
-  def start() = while (true) {
-    withLock(emailType) {
-      sendEmails()
-    }
-
-    logger.info("Polling for new emails")
-    Thread.sleep(pollingFrequency * 1000)
-  }
 }

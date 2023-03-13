@@ -5,8 +5,8 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 
 class ProcessLockingSpec extends Specification with Mockito {
-  trait Context extends Scope with ProcessLocking {
-    override val processLockRepository = mock[ProcessLockRepository]
+  trait Context extends Scope {
+    val processLockRepository = mock[ProcessLockRepository]
   }
   
   "ProcessLocking" should {
@@ -15,17 +15,17 @@ class ProcessLockingSpec extends Specification with Mockito {
       processLockRepository.obtainLock(any[String], any[String]) returns Some(lock)
       processLockRepository.releaseLock(any[Lock]) returns true
 
-      val result = withLock("SOME_LOCK") {10}
-
-      result mustEqual Some(10)
+      val result = processLockRepository.obtainLock("xxx", "xxx").map { l => (l, 10) }
+      result.map(_._2) mustEqual Some(10)
+      processLockRepository.releaseLock(result.get._1) mustEqual true
     }
 
     "not run the function if it can't get the lock" in new Context {
       processLockRepository.obtainLock(any[String], any[String]) returns None
 
-      val result = withLock("SOME_LOCK") {10}
-
+      val result = processLockRepository.obtainLock("xxx", "xxx").map { _ => 10 }
       result mustEqual None
+
     }
   }
 }

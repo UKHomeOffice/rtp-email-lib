@@ -3,8 +3,8 @@ package cjp.emailer
 import java.io.IOException
 import java.net.ServerSocket
 import java.util.concurrent.TimeUnit
-import javax.mail.Message.RecipientType
-import javax.mail.internet.{MimeMessage, MimeMultipart}
+import jakarta.mail.Message.RecipientType
+import jakarta.mail.internet.{MimeMessage, MimeMultipart}
 
 import com.icegreen.greenmail.util.{GreenMail, ServerSetup}
 import com.icegreen.greenmail.configuration.GreenMailConfiguration
