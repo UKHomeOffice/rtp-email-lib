@@ -68,4 +68,12 @@ object EmailStatus {
   val STATUS_SENT = "SENT"
   val STATUS_ERROR = "ERROR"
   val STATUS_EMAIL_ADDRESS_ERROR = "ERROR - Email Address"
+
+  sealed trait EmailSentResult
+  case object Waiting extends EmailSentResult
+  case object Sent extends EmailSentResult
+  case class TransientError(errorMessage :String) extends EmailSentResult
+  case class EmailAddressError(errorMessage :String) extends EmailSentResult
+
 }
+

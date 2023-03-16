@@ -20,12 +20,8 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.4.5",
   "joda-time" % "joda-time" % "2.12.2",
   "org.joda" % "joda-convert" % "2.2.3",
-  "org.apache.commons" % "commons-email" % "1.5",
-  "commons-io" % "commons-io" % "2.11.0",
   "org.apache.commons" % "commons-lang3" % "3.12.0",
-  "com.icegreen" % "greenmail" % "2.0.0" % "test",
   "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.11-g740212b",
-  //"uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.13-g55a5f1d-DPSPS-1142-DependencyUpdates",
   "uk.gov.homeoffice" %% "rtp-test-lib" % "1.6.18-g13a878a",
   "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.1.11-g386f964",
   "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.1.11-g386f964" % Test classifier "tests"
