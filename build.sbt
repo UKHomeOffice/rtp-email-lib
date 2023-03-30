@@ -24,7 +24,8 @@ libraryDependencies ++= Seq(
   "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.11-g740212b",
   "uk.gov.homeoffice" %% "rtp-test-lib" % "1.6.18-g13a878a",
   "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.1.11-g386f964",
-  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.1.11-g386f964" % Test classifier "tests"
+  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.1.11-g386f964" % Test classifier "tests",
+  "org.typelevel" %% "cats-effect" % "3.4.5"
 )
 
 publishTo := {

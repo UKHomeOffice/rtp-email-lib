@@ -1,57 +1,53 @@
 package cjp.emailer
 
+import cats._
+import cats.implicits._
+import cats.effect.IO
 import grizzled.slf4j.Logging
 import uk.gov.homeoffice.domain.core.email.EmailStatus._
 import uk.gov.homeoffice.domain.core.email.{Email, EmailRepository}
 import scala.util.{Try, Success, Failure}
 
-class Emailer(emailRepository: EmailRepository, emailSender :Email => EmailSentResult) extends Logging {
-  private val emailType = "WAITING_CUSTOMER_EMAILS"
+class Emailer(emailRepository: EmailRepository, emailSender :Email => IO[EmailSentResult]) extends Logging {
 
-  def sendEmails() :Either[String, List[(Email, String)]] = try {
+  def sendEmails() :IO[Either[String, List[(Email, EmailSentResult)]]] = try {
     val emailsToSend = emailRepository.findByStatus(STATUS_WAITING)
 
     val results = emailsToSend.map { email =>
-      val newStatus = sendEmail(email)
-      (email, newStatus)
-    }
+      sendEmail(email).map { newStatus => (email, newStatus) }
+    }.sequence
 
-    Right(results)
+    results.map(Right(_))
 
   } catch {
     case e: Exception =>
       logger.error(s"Exception caught in sendEmails loop: ${e.getMessage}")
-      Left(e.getMessage)
+      IO.delay(Left(e.getMessage))
   }
 
-  def sendEmail(email: Email) :String = {
+  def sendEmail(email: Email) :IO[EmailSentResult] = {
     logger.info(s"Sending email to ${email.recipient}")
 
-    Try(emailSender(email)) match {
-      case Success(Sent) =>
+    emailSender(email).map {
+      case Sent =>
         logger.info("Marking email as sent")
         emailRepository.updateStatus(email.emailId, STATUS_SENT)
-        STATUS_SENT
+        Sent
 
-      case Success(Waiting) =>
+      case Waiting =>
         logger.info("Marking not sent")
         emailRepository.updateStatus(email.emailId, STATUS_WAITING)
-        STATUS_WAITING
+        Waiting
 
-      case Success(TransientError(err)) =>
+      case TransientError(err) =>
         logger.error(s"Error sending email: $err")
         emailRepository.updateStatus(email.emailId, STATUS_WAITING)
-        STATUS_WAITING
+        TransientError(err)
 
-      case Success(EmailAddressError(err)) =>
+      case EmailAddressError(err) =>
         logger.error(s"Error with email address: $err")
         emailRepository.updateStatus(email.emailId, STATUS_EMAIL_ADDRESS_ERROR)
-        STATUS_EMAIL_ADDRESS_ERROR
-
-      case Failure(exception) =>
-        /* we assume errors can be recovered from but this runs the risk of emails being spammed in a loop */
-        logger.error(exception.getMessage, exception)
-        STATUS_WAITING
+        EmailAddressError(err)
     }
   }
 
