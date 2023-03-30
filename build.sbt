@@ -6,7 +6,7 @@ val root = Project(id = moduleName, base = file("."))
     name := moduleName,
     organization := "uk.gov.homeoffice",
     scalaVersion := "2.12.16",
-    crossScalaVersions := Seq("2.11.8", "2.12.16")
+    crossScalaVersions := Seq("2.12.16")
   )
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
