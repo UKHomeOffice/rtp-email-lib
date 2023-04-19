@@ -107,8 +107,20 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
 
   def byEmailStatus(emailStatus: String): Imports.DBObject = MongoDBObject(Email.STATUS -> emailStatus)
 
-  def updateStatus(emailId: String, newStatus: String) =
-    collection.update(MongoDBObject(Email.EMAIL_ID -> new ObjectId(emailId)), $set(Email.STATUS -> newStatus))
+  def updateStatus(emailId: String, newStatus: String, newText :Option[String] = None, newHtml :Option[String] = None) = {
+    (newText, newHtml) match {
+      case (Some(text), Some(html)) => //only updates if both are together (to avoid desync)
+        collection.update(MongoDBObject(Email.EMAIL_ID -> new ObjectId(emailId)), $set(
+          Email.STATUS -> newStatus,
+          Email.TEXT -> text,
+          Email.HTML -> html
+        ))
+      case _ =>
+        collection.update(MongoDBObject(Email.EMAIL_ID -> new ObjectId(emailId)), $set(
+          Email.STATUS -> newStatus,
+        ))
+    }
+  }
 
   def updateDate(emailId: String, newDate: DateTime) =
     collection.update(MongoDBObject(Email.EMAIL_ID -> new ObjectId(emailId)), $set(Email.DATE -> newDate))

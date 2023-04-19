@@ -20,7 +20,7 @@ class EmailerSpec extends Specification with Mockito {
     var emailsSent :List[Email] = List()
     def senderFunc(email :Email) :IO[EmailSentResult] = {
       emailsSent = emailsSent ++ List[Email](email)
-      IO.delay(Sent)
+      IO.delay(Sent())
     }
 
     val emailer = new Emailer(emailRepository, senderFunc)
@@ -33,7 +33,7 @@ class EmailerSpec extends Specification with Mockito {
       val result = emailer.sendEmails().unsafeRunSync()
 
       emailsSent.length mustEqual 0
-      there was no(emailRepository).updateStatus(anyString, any)
+      there was no(emailRepository).updateStatus(anyString, any, any, any)
       result mustEqual Right(List())
     }
 
@@ -68,8 +68,8 @@ class EmailerSpec extends Specification with Mockito {
       val result = emailer.sendEmails().unsafeRunSync()
 
       emailsSent.length mustEqual 2
-      there were two(emailRepository).updateStatus(anyString, any)
-      result mustEqual Right(List((emailObj1, Sent), (emailObj2, Sent)))
+      there were two(emailRepository).updateStatus(anyString, any, any, any)
+      result mustEqual Right(List((emailObj1, Sent()), (emailObj2, Sent())))
     }
   }
 }

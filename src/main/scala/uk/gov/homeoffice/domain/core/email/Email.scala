@@ -71,7 +71,7 @@ object EmailStatus {
 
   sealed trait EmailSentResult
   case object Waiting extends EmailSentResult
-  case object Sent extends EmailSentResult
+  case class Sent(newText :Option[String] = None, newHtml :Option[String] = None) extends EmailSentResult
   case class TransientError(errorMessage :String) extends EmailSentResult
   case class EmailAddressError(errorMessage :String) extends EmailSentResult
 

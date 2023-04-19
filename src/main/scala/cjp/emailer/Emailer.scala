@@ -29,10 +29,10 @@ class Emailer(emailRepository: EmailRepository, emailSender :Email => IO[EmailSe
     logger.info(s"Sending email to ${email.recipient}")
 
     emailSender(email).map {
-      case Sent =>
+      case Sent(newText, newHtml) =>
         logger.info("Marking email as sent")
-        emailRepository.updateStatus(email.emailId, STATUS_SENT)
-        Sent
+        emailRepository.updateStatus(email.emailId, STATUS_SENT, newText, newHtml)
+        Sent(newText, newHtml)
 
       case Waiting =>
         logger.info("Marking not sent")
