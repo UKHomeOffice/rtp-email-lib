@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.domain.core.email
 
-import com.mongodb.BasicDBList
+import com.mongodb._
+import com.mongodb.casbah.Imports._
 import org.joda.time.DateTime
 import org.specs2.mutable.Specification
 
@@ -34,6 +35,15 @@ class EmailSpec extends Specification {
       dbObject.removeField("cc")
 
       Email(dbObject).cc must_== List.empty
+
+    }
+
+    "can store and retrieve adhoc personalisations from an email" in {
+      val myStringList :List[String] = List("reason1", "reason3")
+
+      val email = EmailBuilder().copy(personalisations = Some(MongoDBObject("reasons" -> MongoDBList(myStringList :_*))))
+
+      email.toDBObject.get(Email.PERSONALISATIONS).asInstanceOf[DBObject].getAs[MongoDBList]("reasons") must beSome(MongoDBList("reason1", "reason3"))
 
     }
   }
