@@ -80,6 +80,8 @@ object EmailStatus {
   case class Sent(newText :Option[String] = None, newHtml :Option[String] = None) extends EmailSentResult
   case class TransientError(errorMessage :String) extends EmailSentResult
   case class EmailAddressError(errorMessage :String) extends EmailSentResult
+  case object ExhaustedRetries extends EmailSentResult
+  case class PartialError(errorMessage :String) extends EmailSentResult
 
 }
 
