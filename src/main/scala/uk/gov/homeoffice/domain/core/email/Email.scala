@@ -74,6 +74,8 @@ object EmailStatus {
   val STATUS_SENT = "SENT"
   val STATUS_ERROR = "ERROR"
   val STATUS_EMAIL_ADDRESS_ERROR = "ERROR - Email Address"
+  val STATUS_EXHAUSTED = "Exhausted Retries"
+  val STATUS_PARTIAL = "Partial Error"
 
   sealed trait EmailSentResult
   case object Waiting extends EmailSentResult

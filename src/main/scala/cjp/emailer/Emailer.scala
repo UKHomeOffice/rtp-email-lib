@@ -44,10 +44,25 @@ class Emailer(emailRepository: EmailRepository, emailSender :Email => IO[EmailSe
         emailRepository.updateStatus(email.emailId, STATUS_WAITING)
         TransientError(err)
 
+      case ExhaustedRetries =>
+        logger.error(s"Giving up sending email: ${email.emailId}")
+        emailRepository.updateStatus(email.emailId, STATUS_EXHAUSTED)
+        ExhaustedRetries
+
+      case PartialError(err) =>
+        logger.error(s"Partial error, unable to retry: ${email.emailId} $err")
+        emailRepository.updateStatus(email.emailId, STATUS_PARTIAL)
+        PartialError(err)
+
       case EmailAddressError(err) =>
         logger.error(s"Error with email address: $err")
         emailRepository.updateStatus(email.emailId, STATUS_EMAIL_ADDRESS_ERROR)
         EmailAddressError(err)
+
+      case unknown =>
+        logger.error(s"Unexpected Error class reported: $unknown. Passing through as EmailAddressError")
+        emailRepository.updateStatus(email.emailId, unknown.toString)
+        EmailAddressError(unknown.toString)
     }
   }
 
