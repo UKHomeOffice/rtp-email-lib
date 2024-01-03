@@ -11,6 +11,7 @@ import org.joda.time.DateTime
 import org.joda.time.Minutes.minutesBetween
 import uk.gov.homeoffice.domain.core.lock.ProcessLockRepository.EXPIRY_PERIOD_MINS
 import uk.gov.homeoffice.mongo.salat.Repository
+import scala.concurrent.{ExecutionContext, Future}
 
 case class Lock(_id: ObjectId, name: String, host: String, createdAt: DateTime) {
   def toDbObject: DBObject = {
@@ -80,5 +81,31 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
     case e: Throwable =>
       warn(s"error releasing lock: ${lock.name} from host: ${lock.host}. continuing .. ", e)
       false
+  }
+}
+
+trait ProcessLock extends ProcessLockRepository {
+  lazy val host = InetAddress.getLocalHost.getHostName
+
+  def withLock[T](lockName: String)(f: => T) :Option[T] = obtainLock(lockName, host).map { lock =>
+    try {
+      f
+    } finally {
+      releaseLock(lock)
+    }
+  }
+
+  def withLockF[T](lockName :String)(f: => Future[T])(implicit ec :ExecutionContext) :Future[Option[T]] =
+    obtainLock(lockName, host) match {
+      case Some(lock) =>
+        f.map { result =>
+          releaseLock(lock)
+          Some(result)
+        }.recoverWith {
+          case t :Throwable =>
+            releaseLock(lock)
+            Future.failed(t)
+        }
+      case None => Future.successful(None)
   }
 }
