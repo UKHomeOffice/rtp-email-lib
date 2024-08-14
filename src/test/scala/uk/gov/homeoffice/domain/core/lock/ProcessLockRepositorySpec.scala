@@ -1,13 +1,22 @@
 package uk.gov.homeoffice.domain.core.lock
 
-import com.mongodb.casbah.commons.MongoDBObject
 import org.joda.time.DateTime
 import org.specs2.mutable.Specification
-import salat.dao.SalatInsertError
-import uk.gov.homeoffice.mongo.casbah.MongoSpecification
+import org.specs2.specification.AfterEach
+import uk.gov.homeoffice.mongo.TestMongo
+import uk.gov.homeoffice.mongo.casbah._
+import uk.gov.homeoffice.mongo.model.MongoException
 
-class ProcessLockRepositorySpec extends Specification with MongoSpecification {
-  val repository = new ProcessLockRepository with TestMongo
+class ProcessLockRepositorySpec extends Specification with AfterEach {
+  val repository = new ProcessLockRepository(TestMongo.testConnection)
+
+  sequential
+
+  def after() :Unit = {
+    println("dropping db contents between unit tests")
+    repository.drop()
+    repository.initialise()
+  }
 
   "lock" should {
     "acquire lock if not already taken" in {
@@ -51,7 +60,7 @@ class ProcessLockRepositorySpec extends Specification with MongoSpecification {
     "not be able to insert two locks" in {
       val now = DateTime.now()
       repository.insert(Lock("SOME_LOCK", "SOME_OTHER_HOST", now))
-      repository.insert(Lock("SOME_LOCK", "SOME_OTHER_HOST", now)) must throwA[SalatInsertError]
+      repository.insert(Lock("SOME_LOCK", "SOME_OTHER_HOST", now)) must throwA[MongoException]
     }
   }
 }

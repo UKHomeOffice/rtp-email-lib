@@ -1,23 +1,46 @@
 package uk.gov.homeoffice.domain.core.email
 
-import com.mongodb.casbah.Imports
-import com.mongodb.casbah.Imports._
-import com.mongodb.casbah.commons.MongoDBObject
 import grizzled.slf4j.Logging
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
-import uk.gov.homeoffice.mongo.casbah.{MongoSupport, Repository}
 
-trait EmailRepository extends Repository with MongoSupport with Logging {
+import uk.gov.homeoffice.mongo._
+import uk.gov.homeoffice.mongo.model._
+import uk.gov.homeoffice.mongo.model.syntax._
+import uk.gov.homeoffice.mongo.repository._
+import uk.gov.homeoffice.mongo.casbah._
+import uk.gov.homeoffice.mongo.casbah.syntax._
+import io.circe.Json
+import io.circe.generic.auto._
+import io.circe.syntax._
+import uk.gov.homeoffice.mongo.MongoJsonEncoders.DatabaseEncoding._
+
+import scala.language.postfixOps
+
+class EmailRepository(mongoConnection :MongoConnection) {
+
+  val collection =
+    new MongoCasbahSalatRepository[Email](
+      new MongoCasbahRepository(
+        new MongoJsonRepository(
+          new MongoStreamRepository(mongoConnection, collectionName="email", primaryKeys=List("emailId"))
+        )
+      )
+    ) {
+
+    def toMongoObject(a :Email) :MongoResult[MongoDBObject] = Right(a.toDBObject.mongoDBObject)
+    def fromMongoObject(mongoDBObject :MongoDBObject) :MongoResult[Email] = Right(Email(mongoDBObject))
+  }
+
   val collectionName = "email"
 
   val MAX_LIMIT = 100
 
-  def insert(email: Email) = collection.insert(email.toDBObject)
+  def insert(email: Email) = collection.insert(email)
 
   def findByEmailId(emailId: String): Option[Email] =
     collection.findOne(MongoDBObject(Email.EMAIL_ID -> new ObjectId(emailId))) match {
-      case Some(dbo) => Some(Email(dbo))
+      case Some(dbo) => Some(dbo)
       case None => None
     }
 
@@ -52,7 +75,7 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
 
   def findEmailTypesAndCaseIds(caseIds: Iterable[ObjectId], emailTypes: Seq[String]): List[(String, ObjectId)] =
     (for {
-      item <- collection.find(byCaseIdsAndEmailTypes(caseIds, emailTypes), MongoDBObject(Email.CASE_ID -> 1, Email.TYPE -> 1))
+      item <- collection.find(byCaseIdsAndEmailTypes(caseIds, emailTypes), MongoDBObject(Email.CASE_ID -> 1, Email.TYPE -> 1)).toList
       emailType <- item.getAs[String](Email.TYPE)
       caseId <- item.getAs[ObjectId](Email.CASE_ID)
     } yield {
@@ -66,15 +89,15 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
   }
 
 
-  def byEmailTypesAndDate(emailTypes: List[String], days: Int): Imports.DBObject =
+  def byEmailTypesAndDate(emailTypes: List[String], days: Int) =
     $and(Email.TYPE $in emailTypes, Email.DATE $gte DateTime.now.minusDays(days))
 
 
-  def byRecipientEmailIdAndEmailTypes(recipientEmailId: String, emailTypes: String): Imports.DBObject =
+  def byRecipientEmailIdAndEmailTypes(recipientEmailId: String, emailTypes: String) =
     $and(Email.RECIPIENT $eq recipientEmailId, Email.TYPE $eq emailTypes)
 
 
-  def byCaseIdsAndEmailTypes(caseIds: Iterable[ObjectId], emailTypes: Seq[String]): Imports.DBObject =
+  def byCaseIdsAndEmailTypes(caseIds: Iterable[ObjectId], emailTypes: Seq[String]) =
     $and(Email.CASE_ID $in caseIds, Email.TYPE $in emailTypes)
 
   def findByStatus(emailStatus: String): List[Email] = {
@@ -102,10 +125,10 @@ trait EmailRepository extends Repository with MongoSupport with Logging {
 
     builder += Email.DATE -> dateRangeQuery(Some(from), to)
 
-    collection.find(builder.result(), fields).map(Email(_))
+    collection.find(builder.result(), fields).toList.map(Email(_)).toIterator
   }
 
-  def byEmailStatus(emailStatus: String): Imports.DBObject = MongoDBObject(Email.STATUS -> emailStatus)
+  def byEmailStatus(emailStatus: String) = MongoDBObject(Email.STATUS -> emailStatus)
 
   def updateStatus(emailId: String, newStatus: String, newText :Option[String] = None, newHtml :Option[String] = None) = {
     (newText, newHtml) match {

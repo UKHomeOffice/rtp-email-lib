@@ -1,7 +1,10 @@
 package uk.gov.homeoffice.domain.core.email
 
-import com.mongodb.{BasicDBList, DBObject}
-import com.mongodb.casbah.commons.{MongoDBList, MongoDBObject}
+import uk.gov.homeoffice.mongo.model._
+import uk.gov.homeoffice.mongo.repository._
+import uk.gov.homeoffice.mongo.casbah._
+import uk.gov.homeoffice.mongo.casbah.syntax._
+
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 
@@ -17,7 +20,7 @@ case class Email(
   status: String,
   emailType: String,
   cc: List[String] = List.empty,
-  personalisations :Option[DBObject] = None
+  personalisations :Option[MongoDBObject] = None
 ) {
 
   def toDBObject: DBObject = {
@@ -32,7 +35,7 @@ case class Email(
     builder += Email.HTML -> html
     builder += Email.STATUS -> status
     builder += Email.TYPE -> emailType
-    builder += Email.CC -> MongoDBList(cc:_*).underlying
+    builder += Email.CC -> MongoDBList(cc)
     personalisations.map(p => builder += Email.PERSONALISATIONS -> p)
     builder.result()
   }
@@ -63,8 +66,8 @@ object Email {
       dbObject.get(HTML).asInstanceOf[String],
       dbObject.get(STATUS).asInstanceOf[String],
       dbObject.get(TYPE).asInstanceOf[String],
-      if (dbObject.containsField(CC)) dbObject.get(CC).asInstanceOf[BasicDBList].toArray(Array.empty[String]).toList else List.empty,
-      if (dbObject.containsField(PERSONALISATIONS)) Some(dbObject.get(PERSONALISATIONS).asInstanceOf[DBObject]) else None
+      if (dbObject.containsField(CC)) dbObject.get(CC).asInstanceOf[MongoDBList[String]].toList else List.empty,
+      if (dbObject.containsField(PERSONALISATIONS)) Some(dbObject.get(PERSONALISATIONS).asInstanceOf[MongoDBObject]) else None
     )
   }
 }

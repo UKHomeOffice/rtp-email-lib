@@ -2,16 +2,24 @@ package uk.gov.homeoffice.domain.core.lock
 
 import java.net.InetAddress
 
-import com.mongodb.DBObject
-import com.mongodb.casbah.ReadPreference
-import com.mongodb.casbah.commons.MongoDBObject
 import grizzled.slf4j.Logging
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 import org.joda.time.Minutes.minutesBetween
 import uk.gov.homeoffice.domain.core.lock.ProcessLockRepository.EXPIRY_PERIOD_MINS
-import uk.gov.homeoffice.mongo.salat.Repository
 import scala.concurrent.{ExecutionContext, Future}
+
+import uk.gov.homeoffice.mongo._
+import uk.gov.homeoffice.mongo.model._
+import uk.gov.homeoffice.mongo.model.syntax._
+import uk.gov.homeoffice.mongo.repository._
+import uk.gov.homeoffice.mongo.casbah._
+import uk.gov.homeoffice.mongo.casbah.syntax._
+
+import io.circe.Json
+import io.circe.generic.auto._
+import io.circe.syntax._
+import uk.gov.homeoffice.mongo.MongoJsonEncoders.DatabaseEncoding._
 
 case class Lock(_id: ObjectId, name: String, host: String, createdAt: DateTime) {
   def toDbObject: DBObject = {
@@ -25,7 +33,8 @@ case class Lock(_id: ObjectId, name: String, host: String, createdAt: DateTime) 
 }
 
 object Lock {
-  def apply(dbObject: DBObject): Lock = Lock(
+  def apply(dbObject: DBObject): Lock =
+    Lock(
     dbObject.get("_id").asInstanceOf[ObjectId],
     dbObject.get("name").asInstanceOf[String],
     dbObject.get("host").asInstanceOf[String],
@@ -40,18 +49,39 @@ object ProcessLockRepository {
   val EXPIRY_PERIOD_MINS = 10
 }
 
-trait ProcessLockRepository extends Repository[Lock] with Logging {
+class ProcessLockRepository(mongoConnection :MongoConnection) extends Logging with CasbahPassthrough[Lock] {
   val collectionName = "locks"
 
-  dao.collection.createIndex(MongoDBObject("name" -> 1), MongoDBObject("name" -> "lockNameIdx", "unique" -> true))
+  val collection =
+    new MongoCasbahSalatRepository[Lock](
+      new MongoCasbahRepository(
+        new MongoJsonRepository(
+          new MongoStreamRepository(mongoConnection, collectionName="locks", primaryKeys=List("name"))
+        )
+      )
+    ) {
+
+    def toMongoObject(a :Lock) :MongoResult[MongoDBObject] = Right(a.toDbObject.mongoDBObject)
+    def fromMongoObject(mongoDBObject :MongoDBObject) :MongoResult[Lock] = Right(Lock(mongoDBObject))
+  }
+
+  def initialise() :Unit = {
+    collection.mongoCasbahRepository.ensureUniqueIndex(
+      collection.mongoCasbahRepository.mongoJsonRepository.mongoStreamRepository.collection,
+      "lockNameIdx",
+      List("name")
+    )
+  }
+
+  initialise()
 
   private def newLock(name: String, host: String): Option[Lock] = try {
     val lock = Lock(name = name, host = host, createdAt = DateTime.now)
-    insert(lock)
-    debug(s"Lock : $name acquired by host : $host")
+    collection.insert(lock)
+    //println(s"Lock : $name acquired by host : $host") // TODO: reinstate debug logging
     Some(lock)
   } catch {
-    case _: salat.dao.SalatInsertError =>
+    case _: MongoException =>
       debug(s"duplicate key error creating new lock: $name from host: $host. continuing ..")
       None
     case t: Throwable =>
@@ -60,7 +90,7 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
   }
 
   def obtainLock(name: String, host: String): Option[Lock] = try {
-    findOne(MongoDBObject("name" -> name), ReadPreference.primaryPreferred) match {
+    collection.findOne(MongoDBObject("name" -> name)) match {
       case Some(l) => if (minutesBetween(l.createdAt, DateTime.now).getMinutes >= EXPIRY_PERIOD_MINS) {
         if (releaseLock(l)) newLock(name, host) else None
       } else None
@@ -74,7 +104,7 @@ trait ProcessLockRepository extends Repository[Lock] with Logging {
   }
 
   def releaseLock(lock: Lock): Boolean = try {
-    val result = remove(lock)
+    val result = collection.remove(lock.toDbObject.mongoDBObject)
     debug(s"Lock : ${lock.name} released by host : ${lock.host}")
     result.getN == 1
   } catch {

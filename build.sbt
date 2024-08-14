@@ -5,7 +5,7 @@ val root = Project(id = moduleName, base = file("."))
   .settings(
     name := moduleName,
     organization := "uk.gov.homeoffice",
-    scalaVersion := "2.12.16",
+    scalaVersion := "2.13.12", // .14 is available but not with metals support
     crossScalaVersions := Seq("2.12.16")
   )
 
@@ -21,10 +21,10 @@ libraryDependencies ++= Seq(
   "joda-time" % "joda-time" % "2.12.5",
   "org.joda" % "joda-convert" % "2.2.3",
   "org.apache.commons" % "commons-lang3" % "3.14.0",
-  "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.23-g127d510",
+  "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.23-g127d510-U-SNAPSHOT" excludeAll ExclusionRule(organization = "org.json4s"),
   "uk.gov.homeoffice" %% "rtp-test-lib" % "1.6.22-gacd233d",
-  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.1.13-g78c730c",
-  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "3.1.13-g78c730c" % Test classifier "tests",
+  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "4.0.5-ga2c868a-DPSPS-50-MongoDriverUpdate-U-SNAPSHOT",
+  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "4.0.5-ga2c868a-DPSPS-50-MongoDriverUpdate-U-SNAPSHOT" % Test classifier "tests",
   "org.typelevel" %% "cats-effect" % "3.5.2"
 )
 
