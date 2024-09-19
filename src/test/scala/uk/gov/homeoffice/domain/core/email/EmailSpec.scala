@@ -17,7 +17,7 @@ class EmailSpec extends Specification {
       dbObject.get(Email.CASE_ID).toString must_== email.caseId.get
       dbObject.get(Email.CASE_REF).toString must_== email.caseRef.get
       dbObject.get(Email.CC).asInstanceOf[MongoDBList[String]].toList must_== email.cc
-      dbObject.get(Email.DATE).asInstanceOf[DateTime] must_== email.date
+      dbObject.get(Email.DATE).asInstanceOf[DateTime].isEqual(email.date) must beTrue
       dbObject.get(Email.HTML) must_== email.html
       dbObject.get(Email.TEXT) must_== email.text
       dbObject.get(Email.RECIPIENT) must_== email.recipient
@@ -25,7 +25,7 @@ class EmailSpec extends Specification {
       dbObject.get(Email.SUBJECT) must_== email.subject
       dbObject.get(Email.TYPE) must_== email.emailType
 
-      Email(dbObject) must_== email
+      Email(dbObject) mustEqual email
     }
 
     "create correct Email if cc field is missing from the dbObject" in {

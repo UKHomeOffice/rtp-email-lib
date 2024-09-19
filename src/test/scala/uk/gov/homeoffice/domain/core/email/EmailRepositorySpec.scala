@@ -8,7 +8,7 @@ import uk.gov.homeoffice.domain.core.email.EmailStatus._
 import uk.gov.homeoffice.mongo.TestMongo
 
 class EmailRepositorySpec extends Specification with AfterEach {
-  val repository = new EmailRepository(TestMongo.testConnection)
+  val repository = EmailRepository(TestMongo.testConnection)
 
   sequential
 

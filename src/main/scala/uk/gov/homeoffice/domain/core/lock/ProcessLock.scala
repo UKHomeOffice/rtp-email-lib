@@ -61,8 +61,8 @@ class ProcessLockRepository(mongoConnection :MongoConnection) extends Logging wi
       )
     ) {
 
-    def toMongoObject(a :Lock) :MongoResult[MongoDBObject] = Right(a.toDbObject.mongoDBObject)
-    def fromMongoObject(mongoDBObject :MongoDBObject) :MongoResult[Lock] = Right(Lock(mongoDBObject))
+    def toMongoDBObject(a :Lock) :MongoResult[MongoDBObject] = Right(a.toDbObject.mongoDBObject)
+    def fromMongoDBObject(mongoDBObject :MongoDBObject) :MongoResult[Lock] = Right(Lock(mongoDBObject))
   }
 
   def initialise() :Unit = {

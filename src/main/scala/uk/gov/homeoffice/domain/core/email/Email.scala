@@ -26,8 +26,8 @@ case class Email(
   def toDBObject: DBObject = {
     val builder = MongoDBObject.newBuilder
     builder += Email.EMAIL_ID -> new ObjectId(emailId)
-    caseId.map(id => builder += Email.CASE_ID -> new ObjectId(id))
-    builder += Email.CASE_REF -> caseRef
+    caseId.foreach { id => builder += (Email.CASE_ID -> new ObjectId(id)) }
+    caseRef.foreach { cr => builder += (Email.CASE_REF -> caseRef) }
     builder += Email.DATE -> date
     builder += Email.RECIPIENT -> recipient
     builder += Email.SUBJECT -> subject
@@ -36,8 +36,25 @@ case class Email(
     builder += Email.STATUS -> status
     builder += Email.TYPE -> emailType
     builder += Email.CC -> MongoDBList(cc)
-    personalisations.map(p => builder += Email.PERSONALISATIONS -> p)
+    personalisations.foreach { p => builder += (Email.PERSONALISATIONS -> p) }
     builder.result()
+  }
+
+  override def equals(other :Any) = other match {
+    case e :Email =>
+      emailId == e.emailId &&
+      caseId == e.caseId &&
+      caseRef == e.caseRef &&
+      date.isEqual(e.date) &&
+      recipient == e.recipient &&
+      subject == e.subject &&
+      text == e.text &&
+      html == e.html &&
+      status == e.status &&
+      emailType == e.emailType &&
+      cc == e.cc &&
+      personalisations == e.personalisations
+    case _ => false
   }
 }
 
