@@ -66,21 +66,6 @@ class EmailRepositorySpec extends Specification with AfterEach {
       emailDocs.head.emailId mustEqual emailObj.emailId
     }
 
-    // How did this test originally pass? insertEmail defaults to "html" as the text for the html field
-    // so why is email.html passing a comparison to null here?
-
-    //"find email summary by date range" in {
-    //  val emailObj = insertEmail()
-
-    //  repository.findEmailSummaryByDateRange(now.minusHours(1), Some(now)).toStream must beLike {
-    //    case email #:: Stream.Empty =>
-    //      email.emailId mustEqual emailObj.emailId
-    //      email.emailType mustEqual emailObj.emailType
-    //      email.html must beNull
-    //      email.text must beNull
-    //  }
-    //}
-
     "find email by recipient email" in {
       val emailObj = insertEmail()
       val emailDocs = repository.findByRecipientEmailIdAndType(emailObj.recipient, PROVISIONAL_ACCEPTANCE)
