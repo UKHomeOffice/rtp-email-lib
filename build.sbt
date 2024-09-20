@@ -5,7 +5,7 @@ val root = Project(id = moduleName, base = file("."))
   .settings(
     name := moduleName,
     organization := "uk.gov.homeoffice",
-    scalaVersion := "2.13.12", // .14 is available but not with metals support
+    scalaVersion := "2.13.14",
     crossScalaVersions := Seq("2.12.16")
   )
 
