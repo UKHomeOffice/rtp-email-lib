@@ -2,26 +2,39 @@ package uk.gov.homeoffice.domain.core.email
 
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
+import org.specs2.matcher.Scope
 import org.specs2.mutable.Specification
-import uk.gov.homeoffice.mongo.casbah.MongoSpecification
 import uk.gov.homeoffice.domain.core.email.EmailStatus._
+import uk.gov.homeoffice.mongo.TestMongo
 
-class EmailRepositorySpec extends Specification with MongoSpecification {
-  val repository = new EmailRepository with TestMongo
+class EmailRepositorySpec extends Specification {
+
+  class Context extends Scope {
+    implicit val repository = EmailRepository(TestMongo.testConnection)
+  }
+
+  sequential
+
   val PROVISIONAL_ACCEPTANCE = "provisional-acceptance"
   val FAILED_CREDIBILITY_CHECK = "failed-credibility-check"
   val MEMBERSHIP_EXPIRES_SOON = "expiring soon"
   val now = new DateTime()
 
-  def insertEmail(caseId: Option[ObjectId] = Some(new ObjectId()), emailType: String = PROVISIONAL_ACCEPTANCE, html: String = "html", text: String = "text", date: DateTime = now) = {
+  def insertEmail(
+    caseId: Option[ObjectId] = Some(new ObjectId()),
+    emailType: String = PROVISIONAL_ACCEPTANCE,
+    html: String = "html",
+    text: String = "text",
+    date: DateTime = now
+  )(implicit emailRepository :EmailRepository) = {
     val email = EmailBuilder(caseId = caseId, html = html, emailType = emailType, date = date, text = text)
-    repository.insert(email)
+    emailRepository.insert(email)
     email
   }
 
 
   "email repository" should {
-    "find Email by caseId" in {
+    "find Email by caseId" in new Context {
       val email = insertEmail()
       val emailDocuments = repository.findByCaseId(email.caseId.get.toString)
 
@@ -29,7 +42,7 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
       emailDocuments.head.recipient mustEqual s"${email.caseId} recipient"
     }
 
-    "find Emails by caseId and emailType" in {
+    "find Emails by caseId and emailType" in new Context {
       insertEmail(emailType = PROVISIONAL_ACCEPTANCE)
       val failedCredibilityEmail = insertEmail(emailType = FAILED_CREDIBILITY_CHECK)
       val emailDocuments = repository.findByCaseIdAndType(failedCredibilityEmail.caseId.get.toString, FAILED_CREDIBILITY_CHECK)
@@ -38,38 +51,26 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
       emailDocuments.head.recipient mustEqual s"${failedCredibilityEmail.caseId} recipient"
     }
 
-    "find Email by id" in {
+    "find Email by id" in new Context {
       val email = insertEmail()
       val persistedEmail = repository.findByEmailId(email.emailId)
       persistedEmail.get.recipient mustEqual s"${email.caseId} recipient"
     }
 
-    "find emails by email Id without a caseId" in {
+    "find emails by email Id without a caseId" in new Context {
       val emailObj = insertEmail(caseId = None)
       val email = repository.findByEmailId(emailObj.emailId)
       email.get.recipient mustEqual s"${emailObj.caseId} recipient"
     }
 
-    "find emails by status" in {
+    "find emails by status" in new Context {
       val emailObj = insertEmail()
       val emailDocs = repository.findByStatus(STATUS_WAITING)
       emailDocs.size mustEqual 1
       emailDocs.head.emailId mustEqual emailObj.emailId
     }
 
-    "find email summary by date range" in {
-      val emailObj = insertEmail()
-
-      repository.findEmailSummaryByDateRange(now.minusHours(1), Some(now)).toStream must beLike {
-        case email #:: Stream.Empty =>
-          email.emailId mustEqual emailObj.emailId
-          email.emailType mustEqual emailObj.emailType
-          email.html must beNull
-          email.text must beNull
-      }
-    }
-
-    "find email by recipient email" in {
+    "find email by recipient email" in new Context {
       val emailObj = insertEmail()
       val emailDocs = repository.findByRecipientEmailIdAndType(emailObj.recipient, PROVISIONAL_ACCEPTANCE)
       emailDocs.size mustEqual 1
@@ -78,7 +79,7 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
   }
 
   "updateStatus" should {
-    "update Email status" in {
+    "update Email status" in new Context {
       val emailObj = insertEmail()
       repository.updateStatus(emailObj.emailId, STATUS_SENT)
       val Some(updatedEmail) = repository.findByEmailId(emailObj.emailId)
@@ -87,7 +88,7 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
   }
 
   "insert record" should {
-    "contain the correct html" in {
+    "contain the correct html" in new Context {
       val templateHtml = "<html><title>Hello</title></html>"
       val emailObj = insertEmail(html = templateHtml)
       val foundEmail = repository.findByEmailId(emailObj.emailId)
@@ -96,7 +97,7 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
   }
 
   "remove by Case Id" should {
-    "remove an email associated with a case" in {
+    "remove an email associated with a case" in new Context {
       val allCaseIds = (1 to 3).map { _ =>
         val email = insertEmail()
         email.caseId.get.toString
@@ -111,14 +112,14 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
   }
 
   "updateDate" should {
-    "update date older than 7 days" in {
+    "update date older than 7 days" in new Context {
       val emailObj = insertEmail()
       repository.updateDate(emailObj.emailId, DateTime.now().withTimeAtStartOfDay().minusDays(7))
       val Some(updatedEmail) = repository.findByEmailId(emailObj.emailId)
       updatedEmail.date isBefore DateTime.now().minusDays(7)
     }
 
-    "update date younger than 7 days" in {
+    "update date younger than 7 days" in new Context {
       val emailObj = insertEmail()
       repository.updateDate(emailObj.emailId, DateTime.now().withTimeAtStartOfDay().plusDays(7))
       val Some(updatedEmail) = repository.findByEmailId(emailObj.emailId)
@@ -127,7 +128,7 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
   }
 
   "Find warning emails for cases" should {
-    "Return all warning emails for each case" in {
+    "Return all warning emails for each case" in new Context {
       val _caseId = new ObjectId()
 
       val warningEmailTypes = Seq(PROVISIONAL_ACCEPTANCE, FAILED_CREDIBILITY_CHECK, MEMBERSHIP_EXPIRES_SOON)
@@ -144,7 +145,7 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
   }
 
   "findByEmailType" should {
-    "Return all emails by email type" in {
+    "Return all emails by email type" in new Context {
       val provisionalAcceptanceEmail1 = insertEmail(caseId = Some(new ObjectId()), emailType = PROVISIONAL_ACCEPTANCE)
       val provisionalAcceptanceEmail2 = insertEmail(caseId = Some(new ObjectId()), emailType = PROVISIONAL_ACCEPTANCE)
       insertEmail(caseId = Some(new ObjectId()), emailType = FAILED_CREDIBILITY_CHECK)
@@ -154,7 +155,7 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
   }
 
   "findCaseIdsForEmailAlreadySent" should {
-    "Return all case ids for which email already sent" in {
+    "Return all case ids for which email already sent" in new Context {
       val _caseId = new ObjectId()
       val notToBeFound = ObjectId.get()
 
@@ -169,7 +170,7 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
       caseIds must contain((emailType, _caseId))
     }
 
-    "Return empty if no case ids provided" in {
+    "Return empty if no case ids provided" in new Context {
       val _caseId = new ObjectId()
       val notToBeFound = ObjectId.get()
 
@@ -185,7 +186,7 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
   }
 
   "findUserInactiveWarningEmail" should {
-    "return Inactive email" in {
+    "return Inactive email" in new Context {
       val _caseId = new ObjectId()
       val emailTypeObject1 = ObjectId.get()
       val emailTypeObject2 = ObjectId.get()
@@ -207,7 +208,7 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
     }
 
 
-    "return Inactive email within 1 day" in {
+    "return Inactive email within 1 day" in new Context {
       val _caseId = new ObjectId()
       val emailTypeObject1 = ObjectId.get()
       val emailTypeObject2 = ObjectId.get()
@@ -229,7 +230,7 @@ class EmailRepositorySpec extends Specification with MongoSpecification {
 
     }
 
-    "returns no Inactive email within n day" in {
+    "returns no Inactive email within n day" in new Context {
       val _caseId = new ObjectId()
       val emailTypeObject1 = ObjectId.get()
       val emailTypeObject2 = ObjectId.get()

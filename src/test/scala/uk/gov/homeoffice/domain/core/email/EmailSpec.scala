@@ -1,9 +1,9 @@
 package uk.gov.homeoffice.domain.core.email
 
-import com.mongodb._
-import com.mongodb.casbah.Imports._
 import org.joda.time.DateTime
 import org.specs2.mutable.Specification
+import uk.gov.homeoffice.mongo.casbah._
+import uk.gov.homeoffice.mongo.casbah.syntax._
 
 class EmailSpec extends Specification {
 
@@ -16,8 +16,8 @@ class EmailSpec extends Specification {
       dbObject.get(Email.EMAIL_ID).toString must_== email.emailId
       dbObject.get(Email.CASE_ID).toString must_== email.caseId.get
       dbObject.get(Email.CASE_REF).toString must_== email.caseRef.get
-      dbObject.get(Email.CC).asInstanceOf[BasicDBList].toArray(Array.empty[String]).toList must_== email.cc
-      dbObject.get(Email.DATE).asInstanceOf[DateTime] must_== email.date
+      dbObject.get(Email.CC).asInstanceOf[MongoDBList[String]].toList must_== email.cc
+      dbObject.get(Email.DATE).asInstanceOf[DateTime].isEqual(email.date) must beTrue
       dbObject.get(Email.HTML) must_== email.html
       dbObject.get(Email.TEXT) must_== email.text
       dbObject.get(Email.RECIPIENT) must_== email.recipient
@@ -25,7 +25,7 @@ class EmailSpec extends Specification {
       dbObject.get(Email.SUBJECT) must_== email.subject
       dbObject.get(Email.TYPE) must_== email.emailType
 
-      Email(dbObject) must_== email
+      Email(dbObject) mustEqual email
     }
 
     "create correct Email if cc field is missing from the dbObject" in {
@@ -41,9 +41,9 @@ class EmailSpec extends Specification {
     "can store and retrieve adhoc personalisations from an email" in {
       val myStringList :List[String] = List("reason1", "reason3")
 
-      val email = EmailBuilder().copy(personalisations = Some(MongoDBObject("reasons" -> MongoDBList(myStringList :_*))))
+      val email = EmailBuilder().copy(personalisations = Some(MongoDBObject("reasons" -> MongoDBList[String](myStringList :_*))))
 
-      email.toDBObject.get(Email.PERSONALISATIONS).asInstanceOf[DBObject].getAs[MongoDBList]("reasons") must beSome(MongoDBList("reason1", "reason3"))
+      email.toDBObject.get(Email.PERSONALISATIONS).asInstanceOf[MongoDBObject].getAs[MongoDBList[String]]("reasons") must beSome(MongoDBList[String]("reason1", "reason3"))
 
     }
   }

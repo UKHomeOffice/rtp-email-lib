@@ -37,6 +37,8 @@ steps:
     ARTIFACTORY_SERVER: https://artifactory.digital.homeoffice.gov.uk/
     ARTIFACTORY_USERNAME: regt-build-bot
   when:
+    branch:
+    - master
     event:
     - push
     - tag
