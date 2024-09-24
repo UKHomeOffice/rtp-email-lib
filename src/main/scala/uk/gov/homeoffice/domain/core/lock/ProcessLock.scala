@@ -78,7 +78,6 @@ class ProcessLockRepository(mongoConnection :MongoConnection) extends Logging wi
   private def newLock(name: String, host: String): Option[Lock] = try {
     val lock = Lock(name = name, host = host, createdAt = DateTime.now)
     collection.insert(lock)
-    //println(s"Lock : $name acquired by host : $host") // TODO: reinstate debug logging
     Some(lock)
   } catch {
     case _: MongoException =>
