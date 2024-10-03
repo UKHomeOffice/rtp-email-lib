@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "joda-time" % "joda-time" % "2.12.5",
   "org.joda" % "joda-convert" % "2.2.3",
   "org.apache.commons" % "commons-lang3" % "3.14.0",
-  "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.24-gd67586d",
+  "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.24-gd67586d" excludeAll ExclusionRule(organization = "org.json4s"),
   "uk.gov.homeoffice" %% "rtp-test-lib" % "1.6.22-gacd233d",
   "uk.gov.homeoffice" %% "rtp-mongo-lib" % "5.0.4-g9085b13",
   "uk.gov.homeoffice" %% "rtp-mongo-lib" % "5.0.4-g9085b13" % Test classifier "tests",
