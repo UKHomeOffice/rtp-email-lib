@@ -17,7 +17,7 @@ import uk.gov.homeoffice.mongo.MongoJsonEncoders.DatabaseEncoding._
 
 import scala.language.postfixOps
 
-class EmailRepository(val mongoCasbahRepository :MongoCasbahRepository) extends MongoCasbahSalatRepository[Email](mongoCasbahRepository) {
+class EmailRepository(mongoCasbahRepository :MongoCasbahRepository) extends MongoCasbahSalatRepository[Email](mongoCasbahRepository) {
 
   def toMongoDBObject(a :Email) :MongoResult[MongoDBObject] = Right(a.toDBObject.mongoDBObject)
   def fromMongoDBObject(mongoDBObject :MongoDBObject) :MongoResult[Email] = Right(Email(mongoDBObject.asDBObject))
