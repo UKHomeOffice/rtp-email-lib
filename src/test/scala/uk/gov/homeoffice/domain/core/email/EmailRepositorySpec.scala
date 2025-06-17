@@ -10,7 +10,7 @@ import uk.gov.homeoffice.mongo.TestMongo
 class EmailRepositorySpec extends Specification {
 
   class Context extends Scope {
-    implicit val repository = EmailRepository(TestMongo.testConnection)
+    implicit val repository :EmailRepository = EmailRepository(TestMongo.testConnection())
   }
 
   sequential
@@ -39,7 +39,7 @@ class EmailRepositorySpec extends Specification {
       val emailDocuments = repository.findByCaseId(email.caseId.get.toString)
 
       emailDocuments.size mustEqual 1
-      emailDocuments.head.recipient mustEqual s"${email.caseId} recipient"
+      emailDocuments.head.recipient mustEqual s"${email.caseId.get.toString} recipient"
     }
 
     "find Emails by caseId and emailType" in new Context {
@@ -48,19 +48,19 @@ class EmailRepositorySpec extends Specification {
       val emailDocuments = repository.findByCaseIdAndType(failedCredibilityEmail.caseId.get.toString, FAILED_CREDIBILITY_CHECK)
 
       emailDocuments.size mustEqual 1
-      emailDocuments.head.recipient mustEqual s"${failedCredibilityEmail.caseId} recipient"
+      emailDocuments.head.recipient mustEqual s"${failedCredibilityEmail.caseId.get.toString} recipient"
     }
 
     "find Email by id" in new Context {
       val email = insertEmail()
       val persistedEmail = repository.findByEmailId(email.emailId)
-      persistedEmail.get.recipient mustEqual s"${email.caseId} recipient"
+      persistedEmail.get.recipient mustEqual s"${email.caseId.get.toString} recipient"
     }
 
     "find emails by email Id without a caseId" in new Context {
       val emailObj = insertEmail(caseId = None)
       val email = repository.findByEmailId(emailObj.emailId)
-      email.get.recipient mustEqual s"${emailObj.caseId} recipient"
+      email.get.recipient mustEqual s" recipient"
     }
 
     "find emails by status" in new Context {

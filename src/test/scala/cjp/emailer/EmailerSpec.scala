@@ -4,18 +4,19 @@ import cats.effect.IO
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 import org.specs2.matcher.Scope
-import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.domain.core.email.EmailStatus._
 import uk.gov.homeoffice.domain.core.email.{Email, EmailRepository}
+import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers._
 
 import cats.effect.unsafe.implicits.global
 
-class EmailerSpec extends Specification with Mockito {
+class EmailerSpec extends Specification {
   val PROVISIONAL_ACCEPTANCE = "PROVISIONAL_ACCEPTANCE"
 
   trait Context extends Scope {
-    val emailRepository = mock[EmailRepository]
+    val emailRepository :EmailRepository = mock(classOf[EmailRepository])
 
     var emailsSent :List[Email] = List()
     def senderFunc(email :Email) :IO[EmailSentResult] = {
@@ -28,12 +29,12 @@ class EmailerSpec extends Specification with Mockito {
 
   "Emailer" should {
     "sendEmails zero emails if no emails in queue" in new Context {
-      emailRepository.findByStatus(STATUS_WAITING) returns List()
+      when(emailRepository.findByStatus(STATUS_WAITING)).thenReturn(List())
 
       val result = emailer.sendEmails().unsafeRunSync()
 
       emailsSent.length mustEqual 0
-      there was no(emailRepository).updateStatus(anyString, any, any, any)
+      verify(emailRepository, never()).updateStatus(anyString(), anyString(), any(classOf[Option[String]]), any(classOf[Option[String]]))
       result mustEqual Right(List())
     }
 
@@ -63,12 +64,12 @@ class EmailerSpec extends Specification with Mockito {
       )
 
       val emailList = List(emailObj1, emailObj2)
-      emailRepository.findByStatus(STATUS_WAITING) returns emailList
+      when(emailRepository.findByStatus(STATUS_WAITING)).thenReturn(emailList)
 
       val result = emailer.sendEmails().unsafeRunSync()
 
       emailsSent.length mustEqual 2
-      there were two(emailRepository).updateStatus(anyString, any, any, any)
+      verify(emailRepository, times(2)).updateStatus(anyString(), any(), any(), any())
       result mustEqual Right(List((emailObj1, Sent()), (emailObj2, Sent())))
     }
   }
