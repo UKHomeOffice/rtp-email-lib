@@ -24,7 +24,7 @@ case class Email(
 ) {
 
   def toDBObject: DBObject = {
-    val builder = MongoDBObject.newBuilder
+    val builder = MongoDBObject.newBuilder()
     builder += Email.EMAIL_ID -> new ObjectId(emailId)
     caseId.foreach { id => builder += (Email.CASE_ID -> new ObjectId(id)) }
     caseRef.foreach { cr => builder += (Email.CASE_REF -> caseRef) }
@@ -83,7 +83,7 @@ object Email {
       dbObject.get(HTML).asInstanceOf[String],
       dbObject.get(STATUS).asInstanceOf[String],
       dbObject.get(TYPE).asInstanceOf[String],
-      if (dbObject.containsField(CC)) dbObject.get(CC).asInstanceOf[MongoDBList[String]].toList else List.empty,
+      if (dbObject.containsField(CC)) dbObject.get(CC).asInstanceOf[MongoDBList[String]].toList() else List.empty,
       if (dbObject.containsField(PERSONALISATIONS)) Some(dbObject.get(PERSONALISATIONS).asInstanceOf[MongoDBObject]) else None
     )
   }

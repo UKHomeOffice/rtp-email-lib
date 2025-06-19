@@ -23,7 +23,7 @@ import uk.gov.homeoffice.mongo.MongoJsonEncoders.DatabaseEncoding._
 
 case class Lock(_id: ObjectId, name: String, host: String, createdAt: DateTime) {
   def toDbObject: DBObject = {
-    val builder = MongoDBObject.newBuilder
+    val builder = MongoDBObject.newBuilder()
     builder += "_id" -> _id
     builder += "name" -> name
     builder += "host" -> host
@@ -105,7 +105,7 @@ class ProcessLockRepository(mongoConnection :MongoConnection) extends Logging wi
   def releaseLock(lock: Lock): Boolean = try {
     val result = collection.remove(lock.toDbObject.mongoDBObject)
     debug(s"Lock : ${lock.name} released by host : ${lock.host}")
-    result.getN == 1
+    result.getN() == 1
   } catch {
     case e: Throwable =>
       warn(s"error releasing lock: ${lock.name} from host: ${lock.host}. continuing .. ", e)

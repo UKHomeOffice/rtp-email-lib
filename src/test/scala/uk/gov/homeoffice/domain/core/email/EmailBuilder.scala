@@ -10,7 +10,7 @@ object EmailBuilder {
       caseId = if (caseId.isEmpty) None else Some(caseId.get.toString),
       caseRef = Some("123"),
       date = date,
-      recipient = caseId + " recipient",
+      recipient = caseId.map(_.toHexString).getOrElse("") + " recipient",
       subject = "subject",
       text = text,
       html = html,

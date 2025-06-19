@@ -10,7 +10,7 @@ import uk.gov.homeoffice.mongo.model.MongoException
 class ProcessLockRepositorySpec extends Specification {
 
   class Context extends Scope {
-    val repository = new ProcessLockRepository(TestMongo.testConnection)
+    val repository = new ProcessLockRepository(TestMongo.testConnection())
     repository.initialise()
   }
 

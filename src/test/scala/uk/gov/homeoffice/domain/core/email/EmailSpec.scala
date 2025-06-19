@@ -16,7 +16,7 @@ class EmailSpec extends Specification {
       dbObject.get(Email.EMAIL_ID).toString must_== email.emailId
       dbObject.get(Email.CASE_ID).toString must_== email.caseId.get
       dbObject.get(Email.CASE_REF).toString must_== email.caseRef.get
-      dbObject.get(Email.CC).asInstanceOf[MongoDBList[String]].toList must_== email.cc
+      dbObject.get(Email.CC).asInstanceOf[MongoDBList[String]].toList() must_== email.cc
       dbObject.get(Email.DATE).asInstanceOf[DateTime].isEqual(email.date) must beTrue
       dbObject.get(Email.HTML) must_== email.html
       dbObject.get(Email.TEXT) must_== email.text

@@ -5,8 +5,8 @@ val root = Project(id = moduleName, base = file("."))
   .settings(
     name := moduleName,
     organization := "uk.gov.homeoffice",
-    scalaVersion := "2.13.14",
-    crossScalaVersions := Seq("2.12.16", "2.13.14")
+    scalaVersion := "3.3.5",
+    crossScalaVersions := Seq("3.3.5", "2.13.16")
   )
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
@@ -17,15 +17,15 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "ch.qos.logback" % "logback-classic" % "1.4.14",
-  "joda-time" % "joda-time" % "2.12.5",
-  "org.joda" % "joda-convert" % "2.2.3",
-  "org.apache.commons" % "commons-lang3" % "3.14.0",
+  "ch.qos.logback" % "logback-classic" % "1.5.18",
+  "joda-time" % "joda-time" % "2.13.1",
+  "org.joda" % "joda-convert" % "3.0.1",
+  "org.apache.commons" % "commons-lang3" % "3.17.0",
   "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.27-g27a927d" excludeAll ExclusionRule(organization = "org.json4s"),
   "uk.gov.homeoffice" %% "rtp-test-lib" % "1.6.37-g813af7a",
   "uk.gov.homeoffice" %% "rtp-mongo-lib" % "5.0.14-g874e14a",
   "uk.gov.homeoffice" %% "rtp-mongo-lib" % "5.0.14-g874e14a" % Test classifier "tests",
-  "org.typelevel" %% "cats-effect" % "3.5.2"
+  "org.typelevel" %% "cats-effect" % "3.5.7"
 )
 
 publishTo := {
