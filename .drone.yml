@@ -9,33 +9,54 @@ platform:
 
 steps:
 - name: build
-  pull: if-not-exists
-  image: quay.io/ukhomeofficedigital/scala-sbt:latest
+  pull: Always
+  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/rtge/scala-sbt:latest
   commands:
-  - /root/entrypoint.sh
+  - . /app/entrypoint.sh
   - git fetch --tags
-  - sbt clean test
+  - sbt clean coverageEnabled test coverageReport coverageOff
+  - sbt dependencyCheck
+  - sbt scalastyle
+  - sbt scapegoat || /bin/true
+  - sbt +test
   environment:
     ARTIFACTORY_PASSWORD:
       from_secret: ARTIFACTORY_PASSWORD
     ARTIFACTORY_USERNAME: regt-build-bot
-    MONGO_HOST: database
+    DB_TEST_HOST: database
+    JRE_VERSION: 21
+    OVERRIDE_BUILD_REPOS: "false"
+    HOME: "/app"
   when:
     event:
     - push
     - tag
 
-- name: publish
+- name: sonar-scanner
   pull: if-not-exists
-  image: quay.io/ukhomeofficedigital/scala-sbt:latest
+  image: quay.io/ukhomeofficedigital/sonar-scanner:v4.6
   commands:
-  - /root/entrypoint.sh
+  - sonar-scanner
+  when:
+    event:
+    - push
+    - tag
+  depends_on:
+    - build
+
+- name: publish
+  pull: Always
+  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/rtge/scala-sbt:latest
+  commands:
+  - . /app/entrypoint.sh
   - sbt +publish
   environment:
     ARTIFACTORY_PASSWORD:
       from_secret: ARTIFACTORY_PASSWORD
     ARTIFACTORY_SERVER: https://artifactory.digital.homeoffice.gov.uk/
     ARTIFACTORY_USERNAME: regt-build-bot
+    JRE_VERSION: 21
+    OVERRIDE_BUILD_REPOS: "false"
   when:
     branch:
     - master
@@ -43,10 +64,11 @@ steps:
     - push
     - tag
   depends_on:
-    - build
+    - sonar-scanner
+
 services:
 - name: database
   pull: if-not-exists
-  image: mongo
+  image: mongo:5.0
 
 ...
