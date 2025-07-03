@@ -18,14 +18,14 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.5.18",
-  "joda-time" % "joda-time" % "2.13.1",
+  "joda-time" % "joda-time" % "2.14.0",
   "org.joda" % "joda-convert" % "3.0.1",
   "org.apache.commons" % "commons-lang3" % "3.17.0",
-  "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.27-g27a927d" excludeAll ExclusionRule(organization = "org.json4s"),
+  "uk.gov.homeoffice" %% "rtp-io-lib" % "2.2.28-ge2e7d1e",
   "uk.gov.homeoffice" %% "rtp-test-lib" % "1.6.37-g813af7a",
-  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "5.0.14-g874e14a",
-  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "5.0.14-g874e14a" % Test classifier "tests",
-  "org.typelevel" %% "cats-effect" % "3.5.7"
+  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "5.0.15-g96ac4e2",
+  "uk.gov.homeoffice" %% "rtp-mongo-lib" % "5.0.15-g96ac4e2" % Test classifier "tests",
+  "org.typelevel" %% "cats-effect" % "3.6.1"
 )
 
 publishTo := {
