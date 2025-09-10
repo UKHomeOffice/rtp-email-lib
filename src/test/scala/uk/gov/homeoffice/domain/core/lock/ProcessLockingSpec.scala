@@ -13,7 +13,7 @@ class ProcessLockingSpec extends Specification {
   "ProcessLocking" should {
     "run the function with a given lock" in new Context {
       val lock = Lock("SOME_LOCK", "SOME_OTHER_HOST")
-      when(processLockRepository.obtainLock(any, any)).thenReturn(Some(lock))
+      when(processLockRepository.obtainLock(any, any, any)).thenReturn(Some(lock))
       when(processLockRepository.releaseLock(any(classOf[Lock]))).thenReturn(true)
 
       val result = processLockRepository.obtainLock("xxx", "xxx").map { l => (l, 10) }
@@ -22,7 +22,7 @@ class ProcessLockingSpec extends Specification {
     }
 
     "not run the function if it can't get the lock" in new Context {
-      when(processLockRepository.obtainLock(any, any)).thenReturn(None)
+      when(processLockRepository.obtainLock(any, any, any)).thenReturn(None)
 
       val result = processLockRepository.obtainLock("xxx", "xxx").map { _ => 10 }
       result mustEqual None
