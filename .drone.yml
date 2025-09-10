@@ -15,7 +15,6 @@ steps:
   - . /app/entrypoint.sh
   - git fetch --tags
   - sbt clean coverageEnabled test coverageReport coverageOff
-  - sbt dependencyCheck
   - sbt scalastyle
   - sbt scapegoat || /bin/true
   - sbt +test
@@ -32,6 +31,17 @@ steps:
     - push
     - tag
 
+- name: dependency_check
+  pull: Always
+  image: owasp/dependency-check:latest
+  commands:
+    - "/usr/share/dependency-check/bin/dependency-check.sh --scan . || /bin/true"
+  when:
+    event:
+    - push
+  depends_on:
+    - build
+
 - name: sonar-scanner
   pull: if-not-exists
   image: quay.io/ukhomeofficedigital/sonar-scanner:v4.6
@@ -42,7 +52,7 @@ steps:
     - push
     - tag
   depends_on:
-    - build
+    - dependency_check
 
 - name: publish
   pull: Always
