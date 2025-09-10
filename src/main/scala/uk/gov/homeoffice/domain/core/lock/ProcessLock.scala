@@ -88,12 +88,23 @@ class ProcessLockRepository(mongoConnection :MongoConnection) extends Logging wi
       None
   }
 
-  def obtainLock(name: String, host: String): Option[Lock] = try {
-    collection.findOne(MongoDBObject("name" -> name)) match {
-      case Some(l) => if (minutesBetween(l.createdAt, DateTime.now).getMinutes >= EXPIRY_PERIOD_MINS) {
-        if (releaseLock(l)) newLock(name, host) else None
-      } else None
+  def obtainLock(name: String, host: String, sharedLockOnHost :Boolean = false): Option[Lock] = try {
 
+    collection.findOne(MongoDBObject("name" -> name)) match {
+      case Some(l) =>
+        val lockIsExpired = minutesBetween(l.createdAt, DateTime.now).getMinutes >= EXPIRY_PERIOD_MINS
+        val recreateActiveLock = (l.host == host && sharedLockOnHost)
+
+        if (lockIsExpired || recreateActiveLock) {
+            if (releaseLock(l)) {
+              newLock(name, host)
+            } else {
+              None // releaseLock threw an exception
+            }
+        } else {
+          // lock owned by someone else, or no internal sharing allowed (default behaviour)
+          None
+        }
       case None => newLock(name, host)
     }
   } catch {
@@ -105,7 +116,7 @@ class ProcessLockRepository(mongoConnection :MongoConnection) extends Logging wi
   def releaseLock(lock: Lock): Boolean = try {
     val result = collection.remove(lock.toDbObject.mongoDBObject)
     debug(s"Lock : ${lock.name} released by host : ${lock.host}")
-    result.getN() == 1
+    true
   } catch {
     case e: Throwable =>
       warn(s"error releasing lock: ${lock.name} from host: ${lock.host}. continuing .. ", e)
